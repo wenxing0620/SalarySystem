@@ -33,5 +33,16 @@ public class TaxDeductionServiceImpl implements TaxDeductionService {
     public List<taxDeduction> findByEmpId(Integer empId) throws SQLException {
         return dao.findByEmpId(empId);
     }
+
+    @Override
+    public List<taxDeduction> findAll() throws SQLException {
+        return dao.findAll();
+    }
+
+    @Override
+    public void delete(Integer deductionId) throws SQLException {
+        dao.deleteById(deductionId);
+        try { logService.log(null, "DELETE_DEDUCTION", "SYSTEM"); } catch (SQLException ignored) {}
+    }
 }
 

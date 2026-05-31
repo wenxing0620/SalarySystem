@@ -102,6 +102,20 @@ public class TaxDeductionDaoImpl implements TaxDeductionDao {
         return list;
     }
 
+    @Override
+    public List<taxDeduction> findAll() throws SQLException {
+        String sql = "SELECT deduction_id, emp_id, declare_year, child_edu, cont_edu, major_med, housing_loan, housing_rent, support_elderly, baby_care FROM tax_deduction ORDER BY declare_year DESC, emp_id ASC";
+        List<taxDeduction> list = new ArrayList<>();
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(mapRow(rs));
+            }
+        }
+        return list;
+    }
+
     private taxDeduction mapRow(ResultSet rs) throws SQLException {
         taxDeduction t = new taxDeduction();
         t.setDeductionId(rs.getInt("deduction_id"));

@@ -158,12 +158,12 @@
 
 <div class="sidebar">
     <ul class="sidebar-menu">
-        <li><a href="dashboard">📊 首页</a></li>
-        <li><a href="emp-list">👥 员工管理</a></li>
-        <li><a href="salary-list">💰 薪资管理</a></li>
-        <li><a href="deduction">📄 专项附加扣除</a></li>
-        <li><a href="audit-log">📋 审计日志</a></li>
-        <li><a href="logout">🚪 登出</a></li>
+        <li><a href="<%= request.getContextPath() %>/dashboard">[首页]</a></li>
+        <li><a href="<%= request.getContextPath() %>/emp-list">[员工管理]</a></li>
+        <li><a href="<%= request.getContextPath() %>/salary-list">[薪资管理]</a></li>
+        <li><a href="<%= request.getContextPath() %>/deduction">[专项附加扣除]</a></li>
+        <li><a href="<%= request.getContextPath() %>/audit-log">[审计日志]</a></li>
+        <li><a href="<%= request.getContextPath() %>/logout">[登出]</a></li>
     </ul>
 </div>
 

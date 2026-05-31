@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 
 @WebServlet("/logout")
 public class LogoutServlet extends HttpServlet {
@@ -18,7 +19,8 @@ public class LogoutServlet extends HttpServlet {
         if (session != null) {
             session.invalidate();
         }
-        response.sendRedirect("login.jsp?success=已登出");
+        String msg = URLEncoder.encode("已登出", "UTF-8");
+        response.sendRedirect("login.jsp?success=" + msg);
     }
 }
 

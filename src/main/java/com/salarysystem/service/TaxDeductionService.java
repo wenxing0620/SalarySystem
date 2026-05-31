@@ -10,5 +10,7 @@ public interface TaxDeductionService {
     taxDeduction findById(Integer id) throws SQLException;
     taxDeduction findByEmpIdAndYear(Integer empId, Integer year) throws SQLException;
     List<taxDeduction> findByEmpId(Integer empId) throws SQLException;
+    List<taxDeduction> findAll() throws SQLException;
+    void delete(Integer deductionId) throws SQLException;
 }
 

@@ -15,7 +15,18 @@
 <body>
 <div class="wrap">
     <h1>系统出现异常</h1>
+    <%
+        String msg = request.getParameter("msg");
+        if (msg != null && !msg.isEmpty()) {
+    %>
+    <p><%= msg %></p>
+    <%
+        } else {
+    %>
     <p>请稍后重试，或联系管理员。</p>
+    <%
+        }
+    %>
     <p>如果是数据库未初始化，请先执行 `create-tables.sql` 和 `init-data.sql`。</p>
     <a class="btn" href="login.jsp">返回登录</a>
 </div>

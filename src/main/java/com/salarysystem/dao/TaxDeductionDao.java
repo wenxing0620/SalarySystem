@@ -12,5 +12,6 @@ public interface TaxDeductionDao extends com.salarysystem.BaseDao {
     taxDeduction findById(Integer deductionId) throws SQLException;
     taxDeduction findByEmpIdAndYear(Integer empId, Integer year) throws SQLException;
     List<taxDeduction> findByEmpId(Integer empId) throws SQLException;
+    List<taxDeduction> findAll() throws SQLException;
 }
 

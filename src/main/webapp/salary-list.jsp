@@ -158,20 +158,21 @@
 
 <div class="sidebar">
     <ul class="sidebar-menu">
-        <li><a href="dashboard">📊 首页</a></li>
-        <li><a href="emp-list">👥 员工管理</a></li>
-        <li><a href="salary-list" class="active">💰 薪资管理</a></li>
-        <li><a href="deduction">📄 专项附加扣除</a></li>
-        <li><a href="audit-log">📋 审计日志</a></li>
-        <li><a href="logout">🚪 登出</a></li>
+        <li><a href="<%= request.getContextPath() %>/dashboard">[首页]</a></li>
+        <li><a href="<%= request.getContextPath() %>/emp-list">[员工管理]</a></li>
+        <li><a href="<%= request.getContextPath() %>/salary-list" class="active">[薪资管理]</a></li>
+        <li><a href="<%= request.getContextPath() %>/deduction">[专项附加扣除]</a></li>
+        <li><a href="<%= request.getContextPath() %>/audit-log">[审计日志]</a></li>
+        <li><a href="<%= request.getContextPath() %>/logout">[登出]</a></li>
     </ul>
 </div>
 
 <div class="main-content">
     <h2>薪资管理</h2>
+    <!-- 导入功能已移除；保留导出功能 -->
 
     <div class="filter-box">
-        <form method="get" action="<%= request.getContextPath() %>/salary-list" style="display:flex;gap:15px;align-items:center;width:100%;">
+        <form id="searchForm" method="get" action="<%= request.getContextPath() %>/salary-list" style="display:flex;gap:15px;align-items:center;width:100%;">
             <select name="month">
                 <option value="">-- 选择月份 --</option>
                 <option value="2026-05" <%= "2026-05".equals(request.getAttribute("month")) ? "selected" : "" %>>2026-05</option>
@@ -186,6 +187,7 @@
             <button type="button" class="btn-export" onclick="location.href='<%= request.getContextPath() %>/salary-list'">重置</button>
             <button type="button" class="btn-export" onclick="exportData()" style="margin-left: auto;">📥 导出</button>
         </form>
+        <!-- 导入功能已移除（由系统管理员控制）；若需恢复请联系开发者 -->
     </div>
 
     <div class="table-container">
@@ -236,7 +238,16 @@
 
 <script>
 function exportData() {
-    alert('导出功能开发中');
+    var ctx = '<%= request.getContextPath() %>';
+    var month = document.querySelector('select[name="month"]').value;
+    var empName = document.getElementById('empName').value;
+    var dept = document.getElementById('dept').value;
+    var params = [];
+    if (month) params.push('month=' + encodeURIComponent(month));
+    if (empName) params.push('empName=' + encodeURIComponent(empName));
+    if (dept) params.push('dept=' + encodeURIComponent(dept));
+    var url = ctx + '/salary-export-excel' + (params.length ? ('?' + params.join('&')) : '');
+    window.location = url;
 }
 function viewSalary(id) {
     alert('查看薪资记录 ' + id);
