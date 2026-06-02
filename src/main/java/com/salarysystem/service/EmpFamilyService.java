@@ -11,5 +11,6 @@ public interface EmpFamilyService {
     void delete(Integer familyId) throws SQLException;
     empFamily findById(Integer familyId) throws SQLException;
     List<empFamily> findByEmpId(Integer empId) throws SQLException;
+    List<empFamily> findAll() throws SQLException;
 }
 

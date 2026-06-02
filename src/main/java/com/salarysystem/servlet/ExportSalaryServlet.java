@@ -18,7 +18,9 @@ import java.io.PrintWriter;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @WebServlet("/salary-export")
 public class ExportSalaryServlet extends HttpServlet {
@@ -35,71 +37,67 @@ public class ExportSalaryServlet extends HttpServlet {
             userId = ((com.salarysystem.model.sysUser) session.getAttribute("currentUser")).getUserId();
         }
 
-        String month = request.getParameter("month");
-        String empName = request.getParameter("empName");
+        String keyword = request.getParameter("keyword");
         String dept = request.getParameter("dept");
+        String startMonth = request.getParameter("startMonth");
+        String endMonth = request.getParameter("endMonth");
 
         try {
-            List<salaryRecord> list = svc.findAll();
+            List<salaryRecord> all = svc.findAll();
+            List<empInfo> emps = empSvc.findAll();
+            Map<Integer, empInfo> empMap = new HashMap<>();
+            for (empInfo e : emps) empMap.put(e.getEmpId(), e);
 
-            // apply simple filters
-            if (month != null && !month.trim().isEmpty()) {
-                String m = month.trim();
-                list.removeIf(r -> !m.equals(r.getSalaryMonth()));
-            }
+            // Filter using same params as SalaryListServlet
+            String kw = keyword != null ? keyword.toLowerCase() : "";
+            String d = dept != null ? dept.toLowerCase() : "";
+            String sm = startMonth != null ? startMonth.trim() : "";
+            String em = endMonth != null ? endMonth.trim() : "";
 
-            // When filtering by employee name or dept, look up empInfo for each record
-            if ((empName != null && !empName.trim().isEmpty()) || (dept != null && !dept.trim().isEmpty())) {
-                String nameFilter = empName == null ? "" : empName.trim();
-                String deptFilter = dept == null ? "" : dept.trim();
-                list.removeIf(r -> {
-                    try {
-                        empInfo e = empSvc.findById(r.getEmpId());
-                        if (e == null) return true;
-                        boolean ok = true;
-                        if (!nameFilter.isEmpty()) ok = e.getEmpName() != null && e.getEmpName().contains(nameFilter);
-                        if (ok && !deptFilter.isEmpty()) ok = e.getDeptName() != null && e.getDeptName().contains(deptFilter);
-                        return !ok;
-                    } catch (SQLException ex) {
-                        return true;
-                    }
-                });
-            }
+            all.removeIf(r -> {
+                empInfo e = empMap.get(r.getEmpId());
+                if (!sm.isEmpty() && r.getSalaryMonth() != null && r.getSalaryMonth().compareTo(sm) < 0) return true;
+                if (!em.isEmpty() && r.getSalaryMonth() != null && r.getSalaryMonth().compareTo(em) > 0) return true;
+                if (!d.isEmpty() && (e == null || e.getDeptName() == null || !e.getDeptName().toLowerCase().contains(d))) return true;
+                if (!kw.isEmpty()) {
+                    if (e == null) return true;
+                    boolean matchNo = e.getEmpNo() != null && e.getEmpNo().toLowerCase().contains(kw);
+                    boolean matchName = e.getEmpName() != null && e.getEmpName().toLowerCase().contains(kw);
+                    if (!matchNo && !matchName) return true;
+                }
+                return false;
+            });
 
-            // prepare CSV response
+            // CSV output
             String filename = "salary_export.csv";
             String encoded = URLEncoder.encode(filename, StandardCharsets.UTF_8.name()).replaceAll("\\+", "%20");
             response.setContentType("text/csv;charset=UTF-8");
             response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + encoded);
 
             try (PrintWriter w = new PrintWriter(new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8))) {
-                // header
-                w.println("emp_no,emp_name,dept_name,salary_month,basic_salary,position_allowance,social_security,tax,actual_salary");
-                for (salaryRecord r : list) {
-                    empInfo e = null;
-                    try {
-                        e = empSvc.findById(r.getEmpId());
-                    } catch (SQLException ignore) {}
-                    String empNo = e == null || e.getEmpNo() == null ? "" : e.getEmpNo();
-                    String empNameOut = e == null || e.getEmpName() == null ? "" : e.getEmpName();
-                    String deptOut = e == null || e.getDeptName() == null ? "" : e.getDeptName();
-                    // escape commas by wrapping in quotes if necessary
-                    String line = String.format("%s,%s,%s,%s,%.2f,%.2f,%.2f,%.2f,%.2f",
-                            csvEscape(empNo), csvEscape(empNameOut), csvEscape(deptOut), r.getSalaryMonth(),
+                w.println("emp_no,emp_name,dept_name,salary_month,basic_salary,position_allowance,lunch_allowance,overtime_salary,full_attend_salary,social_security,provident_fund,tax,absence_deduction,actual_salary");
+                for (salaryRecord r : all) {
+                    empInfo e = empMap.get(r.getEmpId());
+                    String empNo = e == null || e.getEmpNo() == null ? "" : csvEscape(e.getEmpNo());
+                    String empNameOut = e == null || e.getEmpName() == null ? "" : csvEscape(e.getEmpName());
+                    String deptOut = e == null || e.getDeptName() == null ? "" : csvEscape(e.getDeptName());
+                    w.println(String.format("%s,%s,%s,%s,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f",
+                            empNo, empNameOut, deptOut, r.getSalaryMonth(),
                             r.getBasicSalary() == null ? 0.0 : r.getBasicSalary().doubleValue(),
                             r.getPositionAllowance() == null ? 0.0 : r.getPositionAllowance().doubleValue(),
+                            r.getLunchAllowance() == null ? 0.0 : r.getLunchAllowance().doubleValue(),
+                            r.getOvertimeSalary() == null ? 0.0 : r.getOvertimeSalary().doubleValue(),
+                            r.getFullAttendSalary() == null ? 0.0 : r.getFullAttendSalary().doubleValue(),
                             r.getSocialSecurity() == null ? 0.0 : r.getSocialSecurity().doubleValue(),
+                            r.getProvidentFund() == null ? 0.0 : r.getProvidentFund().doubleValue(),
                             r.getTax() == null ? 0.0 : r.getTax().doubleValue(),
-                            r.getActualSalary() == null ? 0.0 : r.getActualSalary().doubleValue());
-                    w.println(line);
+                            r.getAbsenceDeduction() == null ? 0.0 : r.getAbsenceDeduction().doubleValue(),
+                            r.getActualSalary() == null ? 0.0 : r.getActualSalary().doubleValue()));
                 }
                 w.flush();
             }
 
-            // log export
-            try {
-                logService.log(userId, "EXPORT_SALARY", request.getRemoteAddr());
-            } catch (SQLException ignore) {}
+            try { logService.log(userId, "EXPORT_SALARY", request.getRemoteAddr()); } catch (SQLException ignore) {}
 
         } catch (Exception e) {
             response.setContentType("text/plain;charset=UTF-8");
@@ -115,5 +113,3 @@ public class ExportSalaryServlet extends HttpServlet {
         return v;
     }
 }
-
-

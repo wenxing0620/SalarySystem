@@ -22,14 +22,14 @@ public class EmpAddServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("/emp-add.jsp").forward(request, response);
+        // 功能已移至 emp-list.jsp 弹窗
+        response.sendRedirect(request.getContextPath() + "/emp-list");
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
 
-        // Get current user from session
         HttpSession session = request.getSession(false);
         sysUser currentUser = null;
         Integer userId = null;
@@ -37,11 +37,15 @@ public class EmpAddServlet extends HttpServlet {
             currentUser = (sysUser) session.getAttribute("currentUser");
             if (currentUser != null) {
                 userId = currentUser.getUserId();
+                if (currentUser.getRoleId() != null && currentUser.getRoleId() == 4) {
+                    session.setAttribute("message", "权限不足：总经理只能查看，不能新增员工");
+                    response.sendRedirect(request.getContextPath() + "/emp-list");
+                    return;
+                }
             }
         }
         String clientIp = getClientIp(request);
 
-        // Validate required fields
         String empNo = request.getParameter("empNo");
         String deptName = request.getParameter("deptName");
         String position = request.getParameter("position");
@@ -53,8 +57,8 @@ public class EmpAddServlet extends HttpServlet {
         if (empNo == null || empNo.trim().isEmpty() ||
             empName == null || empName.trim().isEmpty() ||
             idCard == null || idCard.trim().isEmpty()) {
-            request.setAttribute("error", "员工编号、姓名、身份证不能为空");
-            request.getRequestDispatcher("/emp-add.jsp").forward(request, response);
+            session.setAttribute("message", "员工编号、姓名、身份证不能为空");
+            response.sendRedirect(request.getContextPath() + "/emp-list");
             return;
         }
 
@@ -69,27 +73,13 @@ public class EmpAddServlet extends HttpServlet {
 
         try {
             svc.create(e);
-            System.out.println("Employee created successfully: " + empNo);
-            // Log the operation
-            try {
-                logService.log(userId, "ADD_EMP", clientIp);
-                System.out.println("Logged: user " + userId + " added employee " + empNo);
-            } catch (SQLException logEx) {
-                System.err.println("Failed to log operation: " + logEx.getMessage());
-            }
-            // Redirect to employee list
-            response.sendRedirect(request.getContextPath() + "/emp-list");
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-            System.err.println("Failed to create employee: " + ex.getMessage());
-            request.setAttribute("error", "添加失败：" + ex.getMessage());
-            request.getRequestDispatcher("/emp-add.jsp").forward(request, response);
+            try { logService.log(userId, "ADD_EMP", clientIp); } catch (SQLException ignored) {}
+            session.setAttribute("message", "员工新增成功");
         } catch (Exception ex) {
             ex.printStackTrace();
-            System.err.println("Unexpected error: " + ex.getMessage());
-            request.setAttribute("error", "系统错误：" + ex.getMessage());
-            request.getRequestDispatcher("/emp-add.jsp").forward(request, response);
+            session.setAttribute("message", "添加失败：" + ex.getMessage());
         }
+        response.sendRedirect(request.getContextPath() + "/emp-list");
     }
 
     private String getClientIp(HttpServletRequest request) {
@@ -100,4 +90,3 @@ public class EmpAddServlet extends HttpServlet {
         return request.getRemoteAddr();
     }
 }
-

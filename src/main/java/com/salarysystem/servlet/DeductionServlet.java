@@ -3,9 +3,11 @@ package com.salarysystem.servlet;
 import com.salarysystem.model.empInfo;
 import com.salarysystem.model.sysUser;
 import com.salarysystem.model.taxDeduction;
+import com.salarysystem.model.PageResult;
 import com.salarysystem.service.impl.EmpInfoServiceImpl;
 import com.salarysystem.service.impl.SysLogServiceImpl;
 import com.salarysystem.service.impl.TaxDeductionServiceImpl;
+import com.salarysystem.util.DesensitizeUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -87,6 +89,14 @@ public class DeductionServlet extends HttpServlet {
 		}
 
 		sysUser user = (sysUser) session.getAttribute("currentUser");
+
+		// 总经理只能查看，不能增删改
+		if (user != null && user.getRoleId() != null && user.getRoleId() == 4) {
+			session.setAttribute("message", "权限不足：总经理只能查看，不能操作扣除申报");
+			resp.sendRedirect(req.getContextPath() + "/deduction");
+			return;
+		}
+
 		String action = safe(req.getParameter("action"));
 
 		try {
@@ -155,7 +165,16 @@ public class DeductionServlet extends HttpServlet {
 	}
 
 	private void prepareListData(HttpServletRequest req) throws SQLException {
-		List<taxDeduction> records = deductionService.findAll();
+		// Get filter parameters
+		Integer filterEmpId = parseInt(req.getParameter("filterEmpId"));
+		Integer filterYear = parseInt(req.getParameter("filterYear"));
+		int pageNo = Math.max(1, parseInt(req.getParameter("pageNo")) != null ? parseInt(req.getParameter("pageNo")) : 1);
+		int pageSize = 10;
+
+		// Get paginated data
+		PageResult<taxDeduction> pageResult = deductionService.findByFilter(filterEmpId, filterYear, pageNo, pageSize);
+
+		// Build view rows with employee info
 		List<empInfo> allEmployees = empService.findAll();
 		Map<Integer, empInfo> empMap = new HashMap<>();
 		for (empInfo emp : allEmployees) {
@@ -163,12 +182,15 @@ public class DeductionServlet extends HttpServlet {
 		}
 
 		List<DeductionViewRow> rows = new java.util.ArrayList<>();
-		for (taxDeduction record : records) {
+		for (taxDeduction record : pageResult.getData()) {
 			empInfo emp = empMap.get(record.getEmpId());
 			rows.add(new DeductionViewRow(record, emp));
 		}
 
 		req.setAttribute("deductionRows", rows);
+		req.setAttribute("pageResult", pageResult);
+		req.setAttribute("filterEmpId", filterEmpId != null ? filterEmpId : "");
+		req.setAttribute("filterYear", filterYear != null ? filterYear : "");
 		req.setAttribute("currentYear", LocalDateTime.now(ZoneId.of("Asia/Shanghai")).getYear());
 		if (req.getAttribute("allEmployees") == null) {
 			req.setAttribute("allEmployees", allEmployees);
@@ -243,27 +265,15 @@ public class DeductionServlet extends HttpServlet {
 		}
 
 		private static String maskName(String name) {
-			if (name == null || name.isEmpty()) {
-				return "-";
-			}
-			if (name.length() == 1) {
-				return "*";
-			}
-			return name.charAt(0) + "*";
+			return com.salarysystem.util.DesensitizeUtil.maskName(name);
 		}
 
 		private static String maskPhone(String phone) {
-			if (phone == null || phone.length() < 7) {
-				return "-";
-			}
-			return phone.substring(0, 3) + "****" + phone.substring(phone.length() - 4);
+			return com.salarysystem.util.DesensitizeUtil.maskPhone(phone);
 		}
 
 		private static String maskIdCard(String idCard) {
-			if (idCard == null || idCard.length() < 8) {
-				return "-";
-			}
-			return idCard.substring(0, 4) + "**********" + idCard.substring(idCard.length() - 4);
+			return com.salarysystem.util.DesensitizeUtil.maskIdCard(idCard);
 		}
 	}
 

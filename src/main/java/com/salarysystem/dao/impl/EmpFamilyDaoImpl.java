@@ -111,5 +111,33 @@ public class EmpFamilyDaoImpl implements EmpFamilyDao {
         }
         return list;
     }
+
+    @Override
+    public List<empFamily> findAll() throws SQLException {
+        String sql = "SELECT family_id, emp_id, relation, name, id_card FROM emp_family ORDER BY emp_id ASC, family_id ASC";
+        List<empFamily> list = new ArrayList<>();
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                empFamily f = new empFamily();
+                f.setFamilyId(rs.getInt("family_id"));
+                f.setEmpId(rs.getInt("emp_id"));
+                f.setRelation(rs.getString("relation"));
+                try {
+                    f.setName(SmCryptoUtil.decryptSm4(rs.getString("name")));
+                } catch (Exception ex) {
+                    f.setName("[解密失败]");
+                }
+                try {
+                    f.setIdCard(SmCryptoUtil.decryptSm4(rs.getString("id_card")));
+                } catch (Exception ex) {
+                    f.setIdCard("[解密失败]");
+                }
+                list.add(f);
+            }
+        }
+        return list;
+    }
 }
 

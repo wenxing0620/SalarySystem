@@ -1,6 +1,7 @@
 package com.salarysystem.service;
 
 import com.salarysystem.model.taxDeduction;
+import com.salarysystem.model.PageResult;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -12,5 +13,6 @@ public interface TaxDeductionService {
     List<taxDeduction> findByEmpId(Integer empId) throws SQLException;
     List<taxDeduction> findAll() throws SQLException;
     void delete(Integer deductionId) throws SQLException;
+    PageResult<taxDeduction> findByFilter(Integer empId, Integer year, int pageNo, int pageSize) throws SQLException;
 }
 

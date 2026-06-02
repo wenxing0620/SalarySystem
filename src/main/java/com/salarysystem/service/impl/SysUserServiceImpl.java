@@ -2,6 +2,7 @@ package com.salarysystem.service.impl;
 
 import com.salarysystem.dao.impl.SysUserDaoImpl;
 import com.salarysystem.dao.impl.SysLogDaoImpl;
+import com.salarysystem.model.PageResult;
 import com.salarysystem.model.sysLog;
 import com.salarysystem.model.sysUser;
 import com.salarysystem.service.SysUserService;
@@ -10,6 +11,7 @@ import com.salarysystem.util.SmCryptoUtil;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 public class SysUserServiceImpl implements SysUserService {
 
@@ -141,6 +143,61 @@ public class SysUserServiceImpl implements SysUserService {
         u.setLockTime(null);
         u.setFailCount(0);
         userDao.update(u);
+    }
+
+    @Override
+    public void updateUser(sysUser user) throws SQLException {
+        // preserve existing password if not provided
+        if (user.getPassword() == null || user.getPassword().isEmpty()) {
+            sysUser existing = userDao.findById(user.getUserId());
+            if (existing != null) user.setPassword(existing.getPassword());
+        }
+        userDao.update(user);
+        sysLog l = new sysLog();
+        l.setUserId(user.getUserId());
+        l.setActionType("UPDATE_USER");
+        l.setIpAddress("SYSTEM");
+        l.setCreateTime(LocalDateTime.now());
+        logDao.insert(l);
+    }
+
+    @Override
+    public void deleteUser(Integer userId) throws SQLException {
+        userDao.deleteById(userId);
+        sysLog l = new sysLog();
+        l.setUserId(userId);
+        l.setActionType("DELETE_USER");
+        l.setIpAddress("SYSTEM");
+        l.setCreateTime(LocalDateTime.now());
+        logDao.insert(l);
+    }
+
+    @Override
+    public void resetPassword(Integer userId, String newPlain) throws SQLException {
+        if (!checkPasswordComplexity(newPlain)) throw new IllegalArgumentException("密码不满足复杂度要求");
+        sysUser user = userDao.findById(userId);
+        if (user == null) throw new IllegalArgumentException("用户不存在");
+        user.setPassword(SmCryptoUtil.hashSm3(newPlain));
+        user.setPwdUpdateTime(LocalDateTime.now());
+        user.setFailCount(0);
+        user.setLockTime(null);
+        userDao.update(user);
+        sysLog l = new sysLog();
+        l.setUserId(userId);
+        l.setActionType("RESET_PASSWORD");
+        l.setIpAddress("SYSTEM");
+        l.setCreateTime(LocalDateTime.now());
+        logDao.insert(l);
+    }
+
+    @Override
+    public PageResult<sysUser> findByFilter(String keyword, Integer roleId, int pageNo, int pageSize) throws SQLException {
+        return userDao.findByFilter(keyword, roleId, pageNo, pageSize);
+    }
+
+    @Override
+    public List<sysUser> findAll() throws SQLException {
+        return userDao.findAll();
     }
 
     private boolean checkPasswordComplexity(String pwd) {

@@ -126,6 +126,38 @@ public class SalaryRecordDaoImpl implements SalaryRecordDao {
         return list;
     }
 
+    @Override
+    public List<salaryRecord> findByEmpIdAndMonthRange(Integer empId, String startMonth, String endMonth) throws SQLException {
+        String sql = "SELECT record_id, emp_id, salary_month, expected_days, actual_days, basic_salary, position_allowance, lunch_allowance, overtime_salary, full_attend_salary, social_security, provident_fund, tax, absence_deduction, actual_salary FROM salary_record WHERE emp_id=? AND salary_month >= ? AND salary_month <= ? ORDER BY salary_month ASC";
+        List<salaryRecord> list = new ArrayList<>();
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, empId);
+            ps.setString(2, startMonth);
+            ps.setString(3, endMonth);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(mapRow(rs));
+            }
+        }
+        return list;
+    }
+
+    @Override
+    public java.math.BigDecimal sumTaxByEmpIdAndYearExcludeMonth(Integer empId, int year, String excludeMonth) throws SQLException {
+        String sql = "SELECT COALESCE(SUM(tax), 0) FROM salary_record WHERE emp_id=? AND salary_month >= ? AND salary_month <= ? AND salary_month <> ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, empId);
+            ps.setString(2, year + "-01");
+            ps.setString(3, year + "-12");
+            ps.setString(4, excludeMonth);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getBigDecimal(1);
+            }
+        }
+        return java.math.BigDecimal.ZERO;
+    }
+
     private salaryRecord mapRow(ResultSet rs) throws SQLException {
         salaryRecord r = new salaryRecord();
         r.setRecordId(rs.getLong("record_id"));

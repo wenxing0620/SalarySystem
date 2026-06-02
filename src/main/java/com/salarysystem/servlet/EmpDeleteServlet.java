@@ -31,6 +31,12 @@ public class EmpDeleteServlet extends HttpServlet {
             currentUser = (sysUser) session.getAttribute("currentUser");
             if (currentUser != null) {
                 userId = currentUser.getUserId();
+                // 总经理只能查看，不能删除
+                if (currentUser.getRoleId() != null && currentUser.getRoleId() == 4) {
+                    session.setAttribute("message", "权限不足：总经理只能查看，不能删除员工");
+                    response.sendRedirect(request.getContextPath() + "/emp-list");
+                    return;
+                }
             }
         }
         String clientIp = getClientIp(request);

@@ -2,6 +2,7 @@ package com.salarysystem.service.impl;
 
 import com.salarysystem.dao.impl.TaxDeductionDaoImpl;
 import com.salarysystem.model.taxDeduction;
+import com.salarysystem.model.PageResult;
 import com.salarysystem.service.TaxDeductionService;
 
 import java.sql.SQLException;
@@ -43,6 +44,11 @@ public class TaxDeductionServiceImpl implements TaxDeductionService {
     public void delete(Integer deductionId) throws SQLException {
         dao.deleteById(deductionId);
         try { logService.log(null, "DELETE_DEDUCTION", "SYSTEM"); } catch (SQLException ignored) {}
+    }
+
+    @Override
+    public PageResult<taxDeduction> findByFilter(Integer empId, Integer year, int pageNo, int pageSize) throws SQLException {
+        return dao.findByFilter(empId, year, pageNo, pageSize);
     }
 }
 

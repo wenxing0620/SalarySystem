@@ -22,26 +22,14 @@ public class EmpEditServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String id = request.getParameter("id");
-        if (id == null) {
-            response.sendRedirect(request.getContextPath() + "/emp-list");
-            return;
-        }
-        try {
-            empInfo e = svc.findById(Integer.parseInt(id));
-            request.setAttribute("emp", e);
-            request.getRequestDispatcher("/emp-edit.jsp").forward(request, response);
-        } catch (SQLException ex) {
-            request.setAttribute("error", ex.getMessage());
-            request.getRequestDispatcher("/emp-edit.jsp").forward(request, response);
-        }
+        // 功能已移至 emp-list.jsp 弹窗
+        response.sendRedirect(request.getContextPath() + "/emp-list");
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
 
-        // Get current user from session
         HttpSession session = request.getSession(false);
         sysUser currentUser = null;
         Integer userId = null;
@@ -49,12 +37,21 @@ public class EmpEditServlet extends HttpServlet {
             currentUser = (sysUser) session.getAttribute("currentUser");
             if (currentUser != null) {
                 userId = currentUser.getUserId();
+                if (currentUser.getRoleId() != null && currentUser.getRoleId() == 4) {
+                    session.setAttribute("message", "权限不足：总经理只能查看，不能编辑员工");
+                    response.sendRedirect(request.getContextPath() + "/emp-list");
+                    return;
+                }
             }
         }
         String clientIp = getClientIp(request);
 
         empInfo e = new empInfo();
-        e.setEmpId(Integer.parseInt(request.getParameter("empId")));
+        try { e.setEmpId(Integer.parseInt(request.getParameter("empId"))); } catch (NumberFormatException ex) {
+            session.setAttribute("message", "参数错误：无效的员工ID");
+            response.sendRedirect(request.getContextPath() + "/emp-list");
+            return;
+        }
         e.setEmpNo(request.getParameter("empNo"));
         e.setDeptName(request.getParameter("deptName"));
         e.setPosition(request.getParameter("position"));
@@ -62,20 +59,16 @@ public class EmpEditServlet extends HttpServlet {
         e.setIdCard(request.getParameter("idCard"));
         e.setPhone(request.getParameter("phone"));
         e.setAddress(request.getParameter("address"));
+
         try {
             svc.update(e);
-            // Log the operation
-            try {
-                logService.log(userId, "UPDATE_EMP", clientIp);
-                System.out.println("Logged: user " + userId + " updated employee " + e.getEmpNo());
-            } catch (SQLException logEx) {
-                System.err.println("Failed to log operation: " + logEx.getMessage());
-            }
-            response.sendRedirect(request.getContextPath() + "/emp-list");
-        } catch (SQLException ex) {
-            request.setAttribute("error", "更新失败：" + ex.getMessage());
-            request.getRequestDispatcher("/emp-edit.jsp").forward(request, response);
+            try { logService.log(userId, "UPDATE_EMP", clientIp); } catch (SQLException ignored) {}
+            session.setAttribute("message", "员工更新成功");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            session.setAttribute("message", "更新失败：" + ex.getMessage());
         }
+        response.sendRedirect(request.getContextPath() + "/emp-list");
     }
 
     private String getClientIp(HttpServletRequest request) {
@@ -86,4 +79,3 @@ public class EmpEditServlet extends HttpServlet {
         return request.getRemoteAddr();
     }
 }
-

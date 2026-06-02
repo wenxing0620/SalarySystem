@@ -40,7 +40,14 @@ public class LoginServlet extends HttpServlet {
             if (user != null) {
                 HttpSession session = request.getSession();
                 session.setAttribute("currentUser", user);
-                response.sendRedirect(request.getContextPath() + "/dashboard");
+
+                // 检查密码是否过期（90天）
+                if (userService.isPasswordExpired(user)) {
+                    session.setAttribute("pendingPasswordChange", true);
+                    response.sendRedirect(request.getContextPath() + "/change-password");
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/dashboard");
+                }
             } else {
                 request.setAttribute("error", "用户名或密码错误，或账号已锁定");
                 request.getRequestDispatcher("/login.jsp").forward(request, response);

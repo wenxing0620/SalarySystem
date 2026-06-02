@@ -1,6 +1,7 @@
 package com.salarysystem.dao.impl;
 
 import com.salarysystem.dao.SysUserDao;
+import com.salarysystem.model.PageResult;
 import com.salarysystem.model.sysUser;
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -102,6 +103,50 @@ public class SysUserDaoImpl implements SysUserDao {
             }
         }
         return list;
+    }
+
+    @Override
+    public PageResult<sysUser> findByFilter(String keyword, Integer roleId, int pageNo, int pageSize) throws SQLException {
+        StringBuilder where = new StringBuilder("WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            where.append(" AND (username LIKE ? OR emp_id IN (SELECT emp_id FROM emp_info WHERE emp_no LIKE ?))");
+            String kw = "%" + keyword.trim() + "%";
+            params.add(kw);
+            params.add(kw);
+        }
+        if (roleId != null) {
+            where.append(" AND role_id = ?");
+            params.add(roleId);
+        }
+
+        String countSql = "SELECT COUNT(*) FROM sys_user " + where;
+        long total = 0;
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(countSql)) {
+            for (int i = 0; i < params.size(); i++) ps.setObject(i + 1, params.get(i));
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) total = rs.getLong(1);
+            }
+        }
+
+        int offset = (pageNo - 1) * pageSize;
+        String sql = "SELECT user_id, emp_id, username, password, role_id, pwd_update_time, fail_count, lock_time FROM sys_user "
+                + where + " ORDER BY user_id LIMIT ? OFFSET ?";
+        List<sysUser> list = new ArrayList<>();
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            int idx = 1;
+            for (Object p : params) ps.setObject(idx++, p);
+            ps.setInt(idx++, pageSize);
+            ps.setInt(idx++, offset);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(mapRow(rs));
+            }
+        }
+
+        return new PageResult<>(list, pageNo, pageSize, total);
     }
 
     private sysUser mapRow(ResultSet rs) throws SQLException {

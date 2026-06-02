@@ -11,5 +11,6 @@ public interface EmpFamilyDao extends com.salarysystem.BaseDao {
     int deleteById(Integer familyId) throws SQLException;
     empFamily findById(Integer familyId) throws SQLException;
     List<empFamily> findByEmpId(Integer empId) throws SQLException;
+    List<empFamily> findAll() throws SQLException;
 }
 

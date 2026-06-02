@@ -21,12 +21,14 @@ public interface BaseDao {
 
     public default Connection getConnection() throws SQLException {
         DataSource dataSource = getDataSource();
-        Connection conn = null;
-        try {
-            conn = dataSource.getConnection();
-        } catch (SQLException sqle) {
-            System.out.println("异常:" + sqle);
+        if (dataSource == null) {
+            throw new SQLException("无法获取数据源：JNDI 查找 java:comp/env/jdbc/SalarySystem 失败，请检查 context.xml 配置");
         }
-        return conn;
+        try {
+            return dataSource.getConnection();
+        } catch (SQLException sqle) {
+            System.out.println("获取数据库连接异常:" + sqle.getMessage());
+            throw sqle;
+        }
     }
 }

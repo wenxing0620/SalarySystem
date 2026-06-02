@@ -2,6 +2,7 @@ package com.salarysystem.dao.impl;
 
 import com.salarysystem.dao.TaxDeductionDao;
 import com.salarysystem.model.taxDeduction;
+import com.salarysystem.model.PageResult;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -114,6 +115,71 @@ public class TaxDeductionDaoImpl implements TaxDeductionDao {
             }
         }
         return list;
+    }
+
+    @Override
+    public PageResult<taxDeduction> findByFilter(Integer empId, Integer year, int pageNo, int pageSize) throws SQLException {
+        long total = countByFilter(empId, year);
+        int offset = (pageNo - 1) * pageSize;
+
+        StringBuilder sql = new StringBuilder("SELECT deduction_id, emp_id, declare_year, child_edu, cont_edu, major_med, housing_loan, housing_rent, support_elderly, baby_care FROM tax_deduction WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+
+        if (empId != null && empId > 0) {
+            sql.append(" AND emp_id = ?");
+            params.add(empId);
+        }
+        if (year != null && year > 0) {
+            sql.append(" AND declare_year = ?");
+            params.add(year);
+        }
+
+        sql.append(" ORDER BY declare_year DESC, emp_id ASC LIMIT ? OFFSET ?");
+        params.add(pageSize);
+        params.add(offset);
+
+        List<taxDeduction> list = new ArrayList<>();
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapRow(rs));
+                }
+            }
+        }
+
+        return new PageResult<>(list, pageNo, pageSize, total);
+    }
+
+    @Override
+    public long countByFilter(Integer empId, Integer year) throws SQLException {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM tax_deduction WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+
+        if (empId != null && empId > 0) {
+            sql.append(" AND emp_id = ?");
+            params.add(empId);
+        }
+        if (year != null && year > 0) {
+            sql.append(" AND declare_year = ?");
+            params.add(year);
+        }
+
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
+            }
+        }
+        return 0;
     }
 
     private taxDeduction mapRow(ResultSet rs) throws SQLException {

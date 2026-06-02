@@ -1,6 +1,7 @@
 package com.salarysystem.dao;
 
 import com.salarysystem.model.taxDeduction;
+import com.salarysystem.model.PageResult;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -13,5 +14,7 @@ public interface TaxDeductionDao extends com.salarysystem.BaseDao {
     taxDeduction findByEmpIdAndYear(Integer empId, Integer year) throws SQLException;
     List<taxDeduction> findByEmpId(Integer empId) throws SQLException;
     List<taxDeduction> findAll() throws SQLException;
+    PageResult<taxDeduction> findByFilter(Integer empId, Integer year, int pageNo, int pageSize) throws SQLException;
+    long countByFilter(Integer empId, Integer year) throws SQLException;
 }
 

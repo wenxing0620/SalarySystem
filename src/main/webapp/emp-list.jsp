@@ -1,279 +1,230 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="com.salarysystem.model.sysUser" %>
-<%@ page import="jakarta.servlet.http.HttpServletRequest" %>
+<%@ page import="com.salarysystem.model.sysUser, com.salarysystem.model.empInfo, com.salarysystem.model.sysDept" %>
+<%@ page import="com.salarysystem.util.DesensitizeUtil, java.util.List" %>
 <%
     sysUser user = (sysUser) session.getAttribute("currentUser");
-    if (user == null) {
-        response.sendRedirect("login.jsp");
-        return;
-    }
-%>
-<%!
+    if (user == null) { response.sendRedirect("login.jsp"); return; }
+
     @SuppressWarnings("unchecked")
-    private java.util.List<com.salarysystem.model.empInfo> getEmpList(HttpServletRequest request) {
-        Object obj = request.getAttribute("empList");
-        if (obj == null) {
-            return new java.util.ArrayList<>();
-        }
-        return (java.util.List<com.salarysystem.model.empInfo>) obj;
-    }
+    List<empInfo> empList = (List<empInfo>) request.getAttribute("empList");
+    if (empList == null) empList = new java.util.ArrayList<>();
+
+    @SuppressWarnings("unchecked")
+    List<sysDept> deptList = (List<sysDept>) request.getAttribute("deptList");
+    if (deptList == null) deptList = new java.util.ArrayList<>();
+
+    empInfo editEmp = (empInfo) request.getAttribute("editEmployee");
+    boolean editModalOpen = editEmp != null;
+
+    String keyword = request.getAttribute("keyword") != null ? request.getAttribute("keyword").toString() : "";
 %>
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <%@ include file="_head.jsp" %>
     <title>员工管理 - 薪资管理系统</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Microsoft YaHei', Arial, sans-serif;
-            background: #f5f5f5;
-        }
-        .navbar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .navbar h1 { font-size: 22px; }
-        .navbar-right {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
-        .navbar-right a, .navbar-right span {
-            color: white;
-            text-decoration: none;
-            cursor: pointer;
-        }
-        .sidebar {
-            width: 250px;
-            background: white;
-            min-height: calc(100vh - 60px);
-            padding-top: 20px;
-            border-right: 1px solid #e0e0e0;
-            float: left;
-        }
-        .sidebar-menu {
-            list-style: none;
-        }
-        .sidebar-menu li {
-            padding: 0;
-        }
-        .sidebar-menu a {
-            display: block;
-            padding: 12px 20px;
-            color: #333;
-            text-decoration: none;
-            border-left: 3px solid transparent;
-            transition: all 0.3s;
-        }
-        .sidebar-menu a:hover, .sidebar-menu a.active {
-            background: #f5f5f5;
-            border-left-color: #667eea;
-            color: #667eea;
-        }
-        .main-content {
-            margin-left: 250px;
-            padding: 30px;
-            min-height: calc(100vh - 60px);
-        }
-        .header-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .search-box {
-            display: flex;
-            gap: 10px;
-        }
-        .search-box input {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        .search-box button {
-            padding: 8px 15px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .table-container {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        table th {
-            background: #f5f5f5;
-            padding: 12px;
-            text-align: left;
-            font-weight: 600;
-            color: #333;
-            border-bottom: 2px solid #e0e0e0;
-        }
-        table td {
-            padding: 12px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        table tr:hover {
-            background: #f9f9f9;
-        }
-        .masked {
-            color: #999;
-        }
-        .btn {
-            padding: 6px 12px;
-            margin: 2px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 12px;
-        }
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-        .btn-primary:hover {
-            background: #5568d3;
-        }
-        .btn-danger {
-            background: #e74c3c;
-            color: white;
-        }
-        .btn-danger:hover {
-            background: #c0392b;
-        }
-        .btn-info {
-            background: #3498db;
-            color: white;
-        }
-        .btn-info:hover {
-            background: #2980b9;
-        }
-        .btn-add {
-            background: #27ae60;
-            color: white;
-            padding: 10px 20px;
-        }
-        .btn-add:hover {
-            background: #229954;
-        }
+        .modal-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
     </style>
 </head>
 <body>
-<div class="navbar">
-    <h1>薪资管理系统</h1>
-    <div class="navbar-right">
-        <span>欢迎, <%= user.getUsername() %></span>
-        <a href="logout">登出</a>
-    </div>
-</div>
+<%@ include file="_navbar.jsp" %>
 
-<div class="sidebar">
-    <ul class="sidebar-menu">
-        <li><a href="<%= request.getContextPath() %>/dashboard">[首页]</a></li>
-        <li><a href="<%= request.getContextPath() %>/emp-list" class="active">[员工管理]</a></li>
-        <li><a href="<%= request.getContextPath() %>/salary-list">[薪资管理]</a></li>
-        <li><a href="<%= request.getContextPath() %>/deduction">[专项附加扣除]</a></li>
-        <li><a href="<%= request.getContextPath() %>/audit-log">[审计日志]</a></li>
-        <li><a href="<%= request.getContextPath() %>/logout">[登出]</a></li>
-    </ul>
-</div>
+<div class="layout">
+    <% request.setAttribute("activeSidebar", "emp-list"); %>
+    <%@ include file="_sidebar.jsp" %>
 
     <div class="main-content">
         <div class="header-section">
             <h2>员工管理</h2>
-            <button class="btn-add" onclick="location.href='<%= request.getContextPath() %>/emp-add'">+ 新增员工</button>
+            <button class="btn btn-success" onclick="openAddModal()">+ 新增员工</button>
         </div>
 
-        <%
-            // Display error message if present
-            if (request.getAttribute("error") != null) {
-        %>
-        <div style="background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
-            <strong>警告：</strong><%= request.getAttribute("error") %>
+        <%@ include file="_alerts.jsp" %>
+
+        <form class="filter-box" method="get" action="<%= request.getContextPath() %>/emp-list">
+            <label for="searchInput" style="position:absolute;left:-9999px;">搜索员工</label>
+            <input type="text" id="searchInput" name="keyword" placeholder="搜索员工编号、姓名、部门、岗位、身份证、手机号..." value="<%= keyword %>" style="min-width:350px;" onkeydown="if(event.key==='Enter'){event.preventDefault();this.form.submit();}">
+            <button type="submit" class="btn btn-primary">搜索</button>
+            <a class="btn btn-secondary" href="<%= request.getContextPath() %>/emp-list">重置</a>
+        </form>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>员工编号</th>
+                        <th>姓名</th>
+                        <th>部门</th>
+                        <th>岗位</th>
+                        <th>身份证</th>
+                        <th>手机号</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <% for (empInfo e : empList) { %>
+                    <tr>
+                        <td><%= e.getEmpNo() %></td>
+                        <td><%= DesensitizeUtil.maskName(e.getEmpName()) %></td>
+                        <td><%= e.getDeptName() %></td>
+                        <td><%= e.getPosition() %></td>
+                        <td><span class="masked"><%= DesensitizeUtil.maskIdCard(e.getIdCard()) %></span></td>
+                        <td><span class="masked"><%= DesensitizeUtil.maskPhone(e.getPhone()) %></span></td>
+                        <td>
+                            <a class="btn btn-primary btn-sm" href="<%= request.getContextPath() %>/emp-view?id=<%= e.getEmpId() %>">查看</a>
+                            <a class="btn btn-primary btn-sm" href="<%= request.getContextPath() %>/emp-list?editId=<%= e.getEmpId() %>&keyword=<%= keyword %>">编辑</a>
+                            <a class="btn btn-danger btn-sm" href="<%= request.getContextPath() %>/emp-delete?id=<%= e.getEmpId() %>" onclick="return confirm('确定要删除该员工吗？');">删除</a>
+                        </td>
+                    </tr>
+                <% } %>
+                <% if (empList.isEmpty()) { %>
+                    <tr><td colspan="7" class="text-center" style="padding:30px;color:#999;">暂无员工数据</td></tr>
+                <% } %>
+                </tbody>
+            </table>
         </div>
-        <%
-            }
-        %>
+    </div>
+</div>
 
-    <form class="search-box" style="margin-bottom: 20px;" method="get" action="<%= request.getContextPath() %>/emp-list">
-        <label for="searchInput" style="position:absolute;left:-9999px;">搜索员工</label>
-        <input type="text" id="searchInput" name="keyword" placeholder="搜索员工编号、姓名、部门、岗位、身份证、手机号..." value="<%= request.getAttribute("keyword") == null ? "" : request.getAttribute("keyword") %>" onkeydown="if(event.key==='Enter'){event.preventDefault(); document.querySelector('.search-box').submit();}">
-        <button type="submit">搜索</button>
-        <button type="button" onclick="window.location.href='<%= request.getContextPath() %>/emp-list'">重置</button>
-    </form>
+<!-- 新增员工弹窗 -->
+<div class="modal-overlay" id="addModal">
+    <div class="modal modal-wide">
+        <h3>新增员工</h3>
+        <form method="post" action="<%= request.getContextPath() %>/emp-add" onsubmit="return validateAddForm()">
+            <div class="form-row">
+                <div class="form-group" style="flex:1;">
+                    <label>员工编号 *</label>
+                    <input type="text" name="empNo" id="addEmpNo" required placeholder="如 EMP001">
+                    <div class="help-text">必填项，需唯一</div>
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label>姓名 *</label>
+                    <input type="text" name="empName" id="addEmpName" required placeholder="如 李明">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group" style="flex:1;">
+                    <label>部门</label>
+                    <select name="deptName" id="addDeptName">
+                        <option value="">-- 请选择部门 --</option>
+                        <% for (sysDept d : deptList) { %>
+                        <option value="<%= d.getDeptName() %>"><%= d.getDeptName() %></option>
+                        <% } %>
+                    </select>
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label>岗位</label>
+                    <input type="text" name="position" id="addPosition" placeholder="如 工程师">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group" style="flex:1;">
+                    <label>身份证号 *</label>
+                    <input type="text" name="idCard" id="addIdCard" required placeholder="18 位身份证号">
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label>手机号</label>
+                    <input type="text" name="phone" id="addPhone" placeholder="如 13912345678">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>住址</label>
+                <input type="text" name="address" id="addAddress" placeholder="如 北京市朝阳区...">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeAddModal()">取消</button>
+                <button type="submit" class="btn btn-success">保存</button>
+            </div>
+        </form>
+    </div>
+</div>
 
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>员工编号</th>
-                    <th>姓名</th>
-                    <th>部门</th>
-                    <th>岗位</th>
-                    <th>身份证</th>
-                    <th>手机号</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody>
-            <%
-                java.util.List<com.salarysystem.model.empInfo> empList = getEmpList(request);
-                for (com.salarysystem.model.empInfo e : empList) {
-            %>
-                <tr>
-                    <td><%= e.getEmpNo() %></td>
-                    <td><%= com.salarysystem.util.DesensitizeUtil.maskName(e.getEmpName()) %></td>
-                    <td><%= e.getDeptName() %></td>
-                    <td><%= e.getPosition() %></td>
-                    <td><span class="masked"><%= com.salarysystem.util.DesensitizeUtil.maskIdCard(e.getIdCard()) %></span></td>
-                    <td><span class="masked"><%= com.salarysystem.util.DesensitizeUtil.maskPhone(e.getPhone()) %></span></td>
-                    <td>
-                        <a class="btn btn-info" href="<%= request.getContextPath() %>/emp-view?id=<%= e.getEmpId() %>">查看</a>
-                        <a class="btn btn-primary" href="<%= request.getContextPath() %>/emp-edit?id=<%= e.getEmpId() %>">编辑</a>
-                        <a class="btn btn-danger" href="<%= request.getContextPath() %>/emp-delete?id=<%= e.getEmpId() %>" onclick="return confirm('确定要删除该员工吗？');">删除</a>
-                    </td>
-                </tr>
-            <%
-                }
-            %>
-            </tbody>
-        </table>
+<!-- 编辑员工弹窗 -->
+<div class="modal-overlay<%= editModalOpen ? " show" : "" %>" id="editModal">
+    <div class="modal modal-wide">
+        <h3>编辑员工</h3>
+        <form method="post" action="<%= request.getContextPath() %>/emp-edit">
+            <input type="hidden" name="empId" value="<%= editModalOpen && editEmp.getEmpId() != null ? editEmp.getEmpId() : "" %>">
+            <div class="form-row">
+                <div class="form-group" style="flex:1;">
+                    <label>员工编号 *</label>
+                    <input type="text" name="empNo" required value="<%= editModalOpen && editEmp.getEmpNo() != null ? editEmp.getEmpNo() : "" %>">
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label>姓名 *</label>
+                    <input type="text" name="empName" required value="<%= editModalOpen && editEmp.getEmpName() != null ? editEmp.getEmpName() : "" %>">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group" style="flex:1;">
+                    <label>部门</label>
+                    <select name="deptName">
+                        <option value="">-- 请选择部门 --</option>
+                        <% for (sysDept d : deptList) {
+                            String sel = editModalOpen && editEmp.getDeptName() != null && editEmp.getDeptName().equals(d.getDeptName()) ? "selected" : "";
+                        %>
+                        <option value="<%= d.getDeptName() %>" <%= sel %>><%= d.getDeptName() %></option>
+                        <% } %>
+                    </select>
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label>岗位</label>
+                    <input type="text" name="position" value="<%= editModalOpen && editEmp.getPosition() != null ? editEmp.getPosition() : "" %>">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group" style="flex:1;">
+                    <label>身份证号 *</label>
+                    <input type="text" name="idCard" required value="<%= editModalOpen && editEmp.getIdCard() != null ? editEmp.getIdCard() : "" %>">
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label>手机号</label>
+                    <input type="text" name="phone" value="<%= editModalOpen && editEmp.getPhone() != null ? editEmp.getPhone() : "" %>">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>住址</label>
+                <input type="text" name="address" value="<%= editModalOpen && editEmp.getAddress() != null ? editEmp.getAddress() : "" %>">
+            </div>
+            <div class="modal-actions">
+                <a class="btn btn-secondary" href="<%= request.getContextPath() %>/emp-list<%= !keyword.isEmpty() ? "?keyword=" + keyword : "" %>">取消</a>
+                <button type="submit" class="btn btn-success">保存</button>
+            </div>
+        </form>
     </div>
 </div>
 
 <script>
-function searchEmployee() {
-    document.querySelector('.search-box').submit();
+function openAddModal() {
+    openModal('addModal');
 }
-function viewEmployee(id) {
-    alert('查看员工 ' + id);
+function closeAddModal() {
+    closeModal('addModal');
+    // 清空表单
+    document.getElementById('addEmpNo').value = '';
+    document.getElementById('addEmpName').value = '';
+    document.getElementById('addDeptName').value = '';
+    document.getElementById('addPosition').value = '';
+    document.getElementById('addIdCard').value = '';
+    document.getElementById('addPhone').value = '';
+    document.getElementById('addAddress').value = '';
 }
-function editEmployee(id) {
-    alert('编辑员工 ' + id);
+function validateAddForm() {
+    var empNo = document.getElementById('addEmpNo').value.trim();
+    var empName = document.getElementById('addEmpName').value.trim();
+    var idCard = document.getElementById('addIdCard').value.trim();
+    if (!empNo) { alert('员工编号不能为空'); return false; }
+    if (!empName) { alert('姓名不能为空'); return false; }
+    if (!idCard) { alert('身份证号不能为空'); return false; }
+    if (idCard.length !== 18) { alert('身份证号应为 18 位'); return false; }
+    return true;
 }
-function deleteEmployee(id) {
-    if (confirm('确定要删除该员工吗？')) {
-        alert('已删除员工 ' + id);
-    }
+
+// 关闭编辑弹窗（点击取消链接已处理，这里处理遮罩点击）
+function closeEditModal() {
+    closeModal('editModal');
 }
 </script>
 </body>
 </html>
-

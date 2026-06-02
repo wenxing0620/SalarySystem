@@ -19,4 +19,10 @@ public class DesensitizeUtil {
         if (name.length() == 2) return name.charAt(0) + "*";
         return name.charAt(0) + "**" + name.charAt(name.length() - 1);
     }
+
+    // 住址脱敏：只显示前6个字
+    public static String maskAddress(String address) {
+        if (address == null || address.length() <= 6) return address;
+        return address.substring(0, 6) + "***";
+    }
 }

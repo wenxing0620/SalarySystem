@@ -39,5 +39,10 @@ public class EmpFamilyServiceImpl implements EmpFamilyService {
     public List<empFamily> findByEmpId(Integer empId) throws SQLException {
         return dao.findByEmpId(empId);
     }
+
+    @Override
+    public List<empFamily> findAll() throws SQLException {
+        return dao.findAll();
+    }
 }
 
