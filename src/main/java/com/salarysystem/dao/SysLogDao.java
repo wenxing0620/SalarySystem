@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface SysLogDao extends com.salarysystem.BaseDao {
+public interface SysLogDao extends BaseDao {
     int insert(sysLog log) throws SQLException;
     int deleteById(Long logId) throws SQLException;
     sysLog findById(Long logId) throws SQLException;

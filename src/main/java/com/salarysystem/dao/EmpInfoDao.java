@@ -5,7 +5,7 @@ import com.salarysystem.model.empInfo;
 import java.sql.SQLException;
 import java.util.List;
 
-public interface EmpInfoDao extends com.salarysystem.BaseDao {
+public interface EmpInfoDao extends BaseDao {
     int insert(empInfo emp) throws SQLException;
     int update(empInfo emp) throws SQLException;
     int deleteById(Integer empId) throws SQLException;

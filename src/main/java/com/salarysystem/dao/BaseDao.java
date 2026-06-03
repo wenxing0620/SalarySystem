@@ -1,4 +1,4 @@
-package com.salarysystem;
+package com.salarysystem.dao;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;

@@ -6,7 +6,7 @@ import com.salarysystem.model.PageResult;
 import java.sql.SQLException;
 import java.util.List;
 
-public interface TaxDeductionDao extends com.salarysystem.BaseDao {
+public interface TaxDeductionDao extends BaseDao {
     int insert(taxDeduction deduction) throws SQLException;
     int update(taxDeduction deduction) throws SQLException;
     int deleteById(Integer deductionId) throws SQLException;
