@@ -4,7 +4,7 @@
 <%
     sysUser currentUser = (sysUser) session.getAttribute("currentUser");
     if (currentUser == null) { response.sendRedirect("login.jsp"); return; }
-    if (currentUser.getRoleId() == null || currentUser.getRoleId() != 1) {
+    if (!"系统管理员".equals(session.getAttribute("currentUserRole"))) {
         session.setAttribute("message", "权限不足");
         response.sendRedirect("dashboard");
         return;

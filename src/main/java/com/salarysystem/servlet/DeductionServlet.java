@@ -91,7 +91,7 @@ public class DeductionServlet extends HttpServlet {
 		sysUser user = (sysUser) session.getAttribute("currentUser");
 
 		// 总经理只能查看，不能增删改
-		if (user != null && user.getRoleId() != null && user.getRoleId() == 4) {
+		if ("总经理".equals(session.getAttribute("currentUserRole"))) {
 			session.setAttribute("message", "权限不足：总经理只能查看，不能操作扣除申报");
 			resp.sendRedirect(req.getContextPath() + "/deduction");
 			return;

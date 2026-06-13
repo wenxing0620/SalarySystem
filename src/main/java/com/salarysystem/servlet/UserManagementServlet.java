@@ -36,7 +36,7 @@ public class UserManagementServlet extends HttpServlet {
         }
 
         sysUser currentUser = (sysUser) session.getAttribute("currentUser");
-        if (currentUser.getRoleId() == null || currentUser.getRoleId() != 1) {
+        if (!"系统管理员".equals(session.getAttribute("currentUserRole"))) {
             session.setAttribute("message", "权限不足：仅系统管理员可访问用户管理");
             resp.sendRedirect(req.getContextPath() + "/dashboard");
             return;
@@ -73,7 +73,7 @@ public class UserManagementServlet extends HttpServlet {
         }
 
         sysUser currentUser = (sysUser) session.getAttribute("currentUser");
-        if (currentUser.getRoleId() == null || currentUser.getRoleId() != 1) {
+        if (!"系统管理员".equals(session.getAttribute("currentUserRole"))) {
             session.setAttribute("message", "权限不足");
             resp.sendRedirect(req.getContextPath() + "/dashboard");
             return;

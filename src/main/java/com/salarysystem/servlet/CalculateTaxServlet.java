@@ -33,7 +33,7 @@ public class CalculateTaxServlet extends HttpServlet {
         sysUser user = (sysUser) session.getAttribute("currentUser");
 
         // 总经理只能查看，不能执行计税
-        if (user != null && user.getRoleId() != null && user.getRoleId() == 4) {
+        if ("总经理".equals(session.getAttribute("currentUserRole"))) {
             session.setAttribute("message", "权限不足：总经理只能查看，不能执行计税操作");
             resp.sendRedirect(req.getContextPath() + "/salary-list");
             return;

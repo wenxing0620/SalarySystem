@@ -32,7 +32,7 @@ public class EmpDeleteServlet extends HttpServlet {
             if (currentUser != null) {
                 userId = currentUser.getUserId();
                 // 总经理只能查看，不能删除
-                if (currentUser.getRoleId() != null && currentUser.getRoleId() == 4) {
+                if ("总经理".equals(session.getAttribute("currentUserRole"))) {
                     session.setAttribute("message", "权限不足：总经理只能查看，不能删除员工");
                     response.sendRedirect(request.getContextPath() + "/emp-list");
                     return;

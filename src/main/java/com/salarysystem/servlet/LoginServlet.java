@@ -1,5 +1,7 @@
 package com.salarysystem.servlet;
 
+import com.salarysystem.dao.impl.SysRoleDaoImpl;
+import com.salarysystem.model.sysRole;
 import com.salarysystem.model.sysUser;
 import com.salarysystem.service.impl.SysUserServiceImpl;
 import jakarta.servlet.ServletException;
@@ -16,6 +18,7 @@ import java.sql.SQLException;
 public class LoginServlet extends HttpServlet {
 
     private final SysUserServiceImpl userService = new SysUserServiceImpl();
+    private final SysRoleDaoImpl roleDao = new SysRoleDaoImpl();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -40,6 +43,14 @@ public class LoginServlet extends HttpServlet {
             if (user != null) {
                 HttpSession session = request.getSession();
                 session.setAttribute("currentUser", user);
+
+                // 加载角色名称存入 session，供后续权限判断使用
+                try {
+                    sysRole role = roleDao.findById(user.getRoleId());
+                    session.setAttribute("currentUserRole", role != null ? role.getRoleName() : "未知");
+                } catch (Exception e) {
+                    session.setAttribute("currentUserRole", "未知");
+                }
 
                 // 检查密码是否过期（90天）
                 if (userService.isPasswordExpired(user)) {

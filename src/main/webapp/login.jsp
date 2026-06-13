@@ -117,7 +117,7 @@
 
         <div class="footer-note">
             <strong>测试账号</strong><br>
-            admin / hr / finance / audit<br>
+            admin / hr / finance / audit / gm<br>
             默认密码：<strong>Admin@123</strong>
         </div>
     </div>

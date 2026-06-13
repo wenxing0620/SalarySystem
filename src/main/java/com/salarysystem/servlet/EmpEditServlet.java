@@ -37,7 +37,7 @@ public class EmpEditServlet extends HttpServlet {
             currentUser = (sysUser) session.getAttribute("currentUser");
             if (currentUser != null) {
                 userId = currentUser.getUserId();
-                if (currentUser.getRoleId() != null && currentUser.getRoleId() == 4) {
+                if ("总经理".equals(session.getAttribute("currentUserRole"))) {
                     session.setAttribute("message", "权限不足：总经理只能查看，不能编辑员工");
                     response.sendRedirect(request.getContextPath() + "/emp-list");
                     return;

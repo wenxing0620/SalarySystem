@@ -1,18 +1,22 @@
 <%@ page pageEncoding="UTF-8" %>
 <%@ page import="com.salarysystem.model.sysUser" %>
 <%
-    sysUser sidebarUser = (sysUser) session.getAttribute("currentUser");
-    Integer roleId = (sidebarUser != null) ? sidebarUser.getRoleId() : null;
-    boolean isAdmin = roleId != null && roleId == 1;
-    boolean isHR = roleId != null && (roleId == 1 || roleId == 2 || roleId == 4);
-    boolean isFinance = roleId != null && (roleId == 1 || roleId == 3 || roleId == 4);
-    boolean isAudit = roleId != null && (roleId == 1 || roleId == 5);
-    boolean isGM = roleId != null && roleId == 4;
+    String _role = (String) session.getAttribute("currentUserRole");
+    boolean isAdmin = "系统管理员".equals(_role);
+    boolean isHR = "系统管理员".equals(_role) || "人事管理员".equals(_role) || "总经理".equals(_role);
+    boolean isFinance = "系统管理员".equals(_role) || "财务管理员".equals(_role) || "总经理".equals(_role);
+    boolean isAudit = "系统管理员".equals(_role) || "审计管理员".equals(_role);
+    boolean isGM = "总经理".equals(_role);
     String active = (String) request.getAttribute("activeSidebar");
     if (active == null) active = "";
     String ctx = request.getContextPath();
 %>
+<!-- debug: _role=<%= _role %>, isAdmin=<%= isAdmin %>, isHR=<%= isHR %>, isFinance=<%= isFinance %>, isAudit=<%= isAudit %>, isGM=<%= isGM %> -->
 <div class="sidebar">
+    <!-- 当前角色指示 (部署后可删除此区块) -->
+    <div style="padding:4px 16px; font-size:10px; color:#64748b; background:#0f172a;">
+        DEBUG: role=<%= _role != null ? _role : "null" %>, HR=<%= isHR %>, Finance=<%= isFinance %>
+    </div>
     <!-- 业务管理 -->
     <div class="sidebar-label">业务管理</div>
     <ul class="sidebar-menu">
