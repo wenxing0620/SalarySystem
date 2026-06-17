@@ -11,12 +11,7 @@
     if (active == null) active = "";
     String ctx = request.getContextPath();
 %>
-<!-- debug: _role=<%= _role %>, isAdmin=<%= isAdmin %>, isHR=<%= isHR %>, isFinance=<%= isFinance %>, isAudit=<%= isAudit %>, isGM=<%= isGM %> -->
 <div class="sidebar">
-    <!-- 当前角色指示 (部署后可删除此区块) -->
-    <div style="padding:4px 16px; font-size:10px; color:#64748b; background:#0f172a;">
-        DEBUG: role=<%= _role != null ? _role : "null" %>, HR=<%= isHR %>, Finance=<%= isFinance %>
-    </div>
     <!-- 业务管理 -->
     <div class="sidebar-label">业务管理</div>
     <ul class="sidebar-menu">

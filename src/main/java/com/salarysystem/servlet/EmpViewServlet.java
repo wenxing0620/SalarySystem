@@ -49,14 +49,12 @@ public class EmpViewServlet extends HttpServlet {
                 // Log the operation
                 try {
                     logService.log(userId, "VIEW_EMP", clientIp);
-                    System.out.println("Logged: user " + userId + " viewed employee " + e.getEmpNo());
-                } catch (SQLException logEx) {
-                    System.err.println("Failed to log operation: " + logEx.getMessage());
-                }
+                } catch (SQLException ignored) {}
             }
             request.getRequestDispatcher("/emp-view.jsp").forward(request, response);
         } catch (SQLException ex) {
-            request.setAttribute("error", ex.getMessage());
+            ex.printStackTrace();
+            request.setAttribute("error", "加载员工详情失败，请稍后重试");
             request.getRequestDispatcher("/emp-view.jsp").forward(request, response);
         }
     }

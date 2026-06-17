@@ -68,10 +68,8 @@ public class LoginServlet extends HttpServlet {
             String msg = e.getMessage() == null ? "" : e.getMessage();
             if (msg.contains("doesn't exist") || msg.contains("does not exist")) {
                 request.setAttribute("error", "数据库表不存在，请先初始化数据库");
-                request.setAttribute("errorDetail", msg);
             } else {
                 request.setAttribute("error", "系统错误，请稍后重试");
-                request.setAttribute("errorDetail", msg);
             }
             request.getRequestDispatcher("/login.jsp").forward(request, response);
         }

@@ -65,13 +65,12 @@ public class SalaryListServlet extends HttpServlet {
             try {
                 logService.log(((sysUser) session.getAttribute("currentUser")).getUserId(), "QUERY_SALARY", req.getRemoteAddr());
             } catch (Exception logEx) {
-                System.err.println("[SalaryListServlet] 日志写入失败: " + logEx.getMessage());
+                // 日志写入失败不影响业务流程
             }
             req.getRequestDispatcher("/salary-list.jsp").forward(req, resp);
         } catch (Exception e) {
             e.printStackTrace();
-            // 将错误信息显示在页面上，方便排查
-            req.setAttribute("error", "薪资页面加载失败：" + e.getClass().getSimpleName() + " - " + e.getMessage());
+            req.setAttribute("error", "薪资页面加载失败，请稍后重试");
             req.setAttribute("salaryRows", new ArrayList<>());
             req.setAttribute("employees", new ArrayList<>());
             req.getRequestDispatcher("/salary-list.jsp").forward(req, resp);
@@ -176,7 +175,7 @@ public class SalaryListServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/salary-list");
         } catch (Exception e) {
             e.printStackTrace();
-            session.setAttribute("message", "操作失败：" + e.getClass().getSimpleName() + " - " + e.getMessage());
+            session.setAttribute("message", "操作失败，请稍后重试");
             resp.sendRedirect(req.getContextPath() + "/salary-list");
         }
     }

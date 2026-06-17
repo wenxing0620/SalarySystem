@@ -73,17 +73,4 @@ public class SmCryptoUtil {
     public static String hmacSm3Hex(String message) {
         return hmacSm3Hex(DEFAULT_HMAC_KEY, message);
     }
-
-    // 简单测试
-    public static void main(String[] args) {
-        System.out.println("密码 'Admin@123' 的SM3值: " + hashSm3("Admin@123"));
-
-        String idCard = "110105199001011234";
-        String encrypted = encryptSm4(idCard);
-        System.out.println("身份证加密后存入DB: " + encrypted);
-        System.out.println("从DB读取后解密展示: " + decryptSm4(encrypted));
-
-        String h = hmacSm3Hex("mykey", "user|LOGIN|127.0.0.1|2026-01-01T12:00:00");
-        System.out.println("HMAC-SM3: " + h);
-    }
 }

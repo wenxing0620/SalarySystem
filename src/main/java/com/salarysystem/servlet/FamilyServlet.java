@@ -60,7 +60,7 @@ public class FamilyServlet extends HttpServlet {
             req.getRequestDispatcher("/family.jsp").forward(req, resp);
         } catch (Exception e) {
             e.printStackTrace();
-            req.setAttribute("error", "家属页面加载失败：" + e.getClass().getSimpleName() + " - " + e.getMessage());
+            req.setAttribute("error", "家属页面加载失败，请稍后重试");
             req.setAttribute("familyRows", new ArrayList<>());
             req.setAttribute("allEmployees", new ArrayList<>());
             req.getRequestDispatcher("/family.jsp").forward(req, resp);
@@ -116,6 +116,13 @@ public class FamilyServlet extends HttpServlet {
                 return;
             }
 
+            // 身份证格式校验（18位）
+            if (!idCard.matches("^\\d{17}[\\dXx]$")) {
+                session.setAttribute("message", "家属身份证号应为18位，最后一位可为数字或X");
+                resp.sendRedirect(req.getContextPath() + "/family");
+                return;
+            }
+
             empInfo emp = empService.findById(empId);
             if (emp == null) {
                 session.setAttribute("message", "保存失败：员工不存在");
@@ -142,7 +149,7 @@ public class FamilyServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/family");
         } catch (Exception e) {
             e.printStackTrace();
-            session.setAttribute("message", "操作失败：" + e.getMessage());
+            session.setAttribute("message", "操作失败，请稍后重试");
             resp.sendRedirect(req.getContextPath() + "/family");
         }
     }

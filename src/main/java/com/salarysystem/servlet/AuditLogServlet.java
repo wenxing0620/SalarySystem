@@ -82,7 +82,7 @@ public class AuditLogServlet extends HttpServlet {
             request.getRequestDispatcher("/audit-log.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("error", "审计日志加载失败：" + e.getClass().getSimpleName() + " - " + e.getMessage());
+            request.setAttribute("error", "审计日志加载失败，请稍后重试");
             request.getRequestDispatcher("/audit-log.jsp").forward(request, response);
         }
     }

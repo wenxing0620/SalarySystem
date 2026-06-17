@@ -66,7 +66,7 @@ public class CalculateTaxServlet extends HttpServlet {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            session.setAttribute("message", "计税失败：系统错误 - " + e.getMessage());
+            session.setAttribute("message", "计税失败，请稍后重试");
         }
 
         resp.sendRedirect(req.getContextPath() + "/salary-list");

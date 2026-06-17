@@ -65,15 +65,17 @@ public class EmpListServlet extends HttpServlet {
 
             request.setAttribute("error", null);
         } catch (SQLException e) {
+            e.printStackTrace();
             request.setAttribute("empList", new ArrayList<>());
             request.setAttribute("deptList", new ArrayList<>());
             request.setAttribute("keyword", keyword);
-            request.setAttribute("error", "无法加载员工列表: " + e.getMessage());
+            request.setAttribute("error", "无法加载员工列表，请稍后重试");
         } catch (Exception e) {
+            e.printStackTrace();
             request.setAttribute("empList", new ArrayList<>());
             request.setAttribute("deptList", new ArrayList<>());
             request.setAttribute("keyword", keyword);
-            request.setAttribute("error", "系统错误: " + e.getMessage());
+            request.setAttribute("error", "系统错误，请稍后重试");
         }
         request.getRequestDispatcher("/emp-list.jsp").forward(request, response);
     }

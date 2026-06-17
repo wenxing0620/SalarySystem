@@ -109,7 +109,7 @@
 <div class="modal-overlay" id="addModal">
     <div class="modal">
         <h3>新增家属</h3>
-        <form method="post" action="<%= request.getContextPath() %>/family">
+        <form method="post" action="<%= request.getContextPath() %>/family" onsubmit="return validateFamilyForm()">
             <input type="hidden" name="action" value="save">
             <div class="form-row">
                 <div class="form-group">
@@ -153,7 +153,7 @@
 <div class="modal-overlay<%= editModalOpen ? " show" : "" %>" id="editModal">
     <div class="modal">
         <h3>编辑家属</h3>
-        <form method="post" action="<%= request.getContextPath() %>/family">
+        <form method="post" action="<%= request.getContextPath() %>/family" onsubmit="return validateFamilyForm()">
             <input type="hidden" name="action" value="save">
             <input type="hidden" name="familyId" value="<%= editModalOpen ? editFamily.getFamilyId() : "" %>">
             <div class="form-row">
@@ -199,6 +199,14 @@
 </div>
 
 <script>
+function validateFamilyForm() {
+    var idCard = (document.getElementById('addIdCard') || document.getElementById('editIdCard')).value.trim();
+    if (idCard.length !== 18 || !/^\d{17}[\dXx]$/.test(idCard)) {
+        alert('身份证号应为18位数字，最后一位可为数字或X');
+        return false;
+    }
+    return true;
+}
 function openAddModal() { openModal('addModal'); }
 function closeAddModal() {
     closeModal('addModal');

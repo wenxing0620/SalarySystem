@@ -29,32 +29,10 @@
     <p style="color:#e74c3c;font-weight:bold;"><%= errorAttr %></p>
     <%
         } else if (exception != null) {
+            // 记录详细错误到服务器日志，页面只显示简要信息
+            exception.printStackTrace();
     %>
-    <p><strong>异常类型：</strong><%= exception.getClass().getName() %></p>
-    <p><strong>异常消息：</strong><%= exception.getMessage() != null ? exception.getMessage() : "(无消息)" %></p>
-    <%
-        Throwable cause = exception.getCause();
-        if (cause != null) {
-    %>
-    <p><strong>根因：</strong><%= cause.getClass().getName() %> - <%= cause.getMessage() != null ? cause.getMessage() : "(无消息)" %></p>
-    <%
-        }
-    %>
-    <p><strong>请求URI：</strong><%= requestUri != null ? requestUri : "未知" %></p>
-    <p><strong>Servlet：</strong><%= servletName != null ? servletName : "未知" %></p>
-    <p><strong>状态码：</strong><%= statusCode != null ? statusCode : "未知" %></p>
-    <details>
-        <summary>查看堆栈跟踪</summary>
-        <pre><%
-            if (exception != null) {
-                java.io.StringWriter sw = new java.io.StringWriter();
-                java.io.PrintWriter pw = new java.io.PrintWriter(sw);
-                exception.printStackTrace(pw);
-                pw.flush();
-                out.print(sw.toString().replace("<", "&lt;").replace(">", "&gt;"));
-            }
-        %></pre>
-    </details>
+    <p>系统出现异常，请稍后重试或联系管理员。</p>
     <%
         } else if (msg != null && !msg.isEmpty()) {
     %>

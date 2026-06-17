@@ -1,6 +1,7 @@
 package com.salarysystem.dao.impl;
 
 import com.salarysystem.dao.SysLogDao;
+import com.salarysystem.model.PageResult;
 import com.salarysystem.model.sysLog;
 import com.salarysystem.util.SmCryptoUtil;
 
@@ -138,7 +139,7 @@ public class SysLogDaoImpl implements SysLogDao {
     }
 
     @Override
-    public com.salarysystem.model.PageResult<sysLog> findByFilters(
+    public PageResult<sysLog> findByFilters(
             Integer userId, String actionType,
             LocalDateTime startTime, LocalDateTime endTime,
             int pageNo, int pageSize) throws SQLException {

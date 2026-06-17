@@ -32,15 +32,6 @@ public class DashboardServlet extends HttpServlet {
         }
 
         sysUser currentUser = (sysUser) session.getAttribute("currentUser");
-
-        // 加载员工总数
-        try {
-            int empCount = empService.findAll().size();
-            request.setAttribute("empCount", empCount);
-        } catch (SQLException e) {
-            request.setAttribute("empCount", 0);
-        }
-
         // 加载最近操作日志（最新 10 条）
         try {
             List<sysLog> recentLogs = logService.findRecent(10);

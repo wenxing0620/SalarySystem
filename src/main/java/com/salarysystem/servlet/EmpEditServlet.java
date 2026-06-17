@@ -52,21 +52,66 @@ public class EmpEditServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/emp-list");
             return;
         }
-        e.setEmpNo(request.getParameter("empNo"));
+        String empNo = request.getParameter("empNo");
+        String empName = request.getParameter("empName");
+        String idCard = request.getParameter("idCard");
+        String phone = request.getParameter("phone");
+
+        // 必填字段校验
+        if (empNo == null || empNo.trim().isEmpty() ||
+            empName == null || empName.trim().isEmpty() ||
+            idCard == null || idCard.trim().isEmpty()) {
+            session.setAttribute("message", "员工编号、姓名、身份证不能为空");
+            response.sendRedirect(request.getContextPath() + "/emp-list");
+            return;
+        }
+
+        String idCardStr = idCard.trim();
+        if (!idCardStr.matches("^\\d{17}[\\dXx]$")) {
+            session.setAttribute("message", "身份证号应为18位，最后一位可为数字或X");
+            response.sendRedirect(request.getContextPath() + "/emp-list");
+            return;
+        }
+
+        String phoneStr = phone != null ? phone.trim() : "";
+        if (!phoneStr.isEmpty() && !phoneStr.matches("^\\d{11}$")) {
+            session.setAttribute("message", "手机号应为11位数字");
+            response.sendRedirect(request.getContextPath() + "/emp-list");
+            return;
+        }
+
+        e.setEmpNo(empNo.trim());
         e.setDeptName(request.getParameter("deptName"));
         e.setPosition(request.getParameter("position"));
-        e.setEmpName(request.getParameter("empName"));
-        e.setIdCard(request.getParameter("idCard"));
-        e.setPhone(request.getParameter("phone"));
+        e.setEmpName(empName.trim());
+        e.setIdCard(idCardStr);
+        e.setPhone(phoneStr);
         e.setAddress(request.getParameter("address"));
 
         try {
+            // 身份证唯一性检查（排除自身）
+            for (empInfo emp : svc.findAll()) {
+                if (idCardStr.equals(emp.getIdCard()) && !emp.getEmpId().equals(e.getEmpId())) {
+                    session.setAttribute("message", "该身份证号已被其他员工使用");
+                    response.sendRedirect(request.getContextPath() + "/emp-list");
+                    return;
+                }
+            }
+
+            // 员工编号唯一性检查（排除自身）
+            empInfo existByNo = svc.findByEmpNo(empNo.trim());
+            if (existByNo != null && !existByNo.getEmpId().equals(e.getEmpId())) {
+                session.setAttribute("message", "员工编号【" + empNo.trim() + "】已存在");
+                response.sendRedirect(request.getContextPath() + "/emp-list");
+                return;
+            }
+
             svc.update(e);
             try { logService.log(userId, "UPDATE_EMP", clientIp); } catch (SQLException ignored) {}
             session.setAttribute("message", "员工更新成功");
         } catch (Exception ex) {
             ex.printStackTrace();
-            session.setAttribute("message", "更新失败：" + ex.getMessage());
+            session.setAttribute("message", "更新失败，请稍后重试");
         }
         response.sendRedirect(request.getContextPath() + "/emp-list");
     }

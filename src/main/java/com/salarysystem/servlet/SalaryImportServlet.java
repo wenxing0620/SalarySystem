@@ -169,7 +169,9 @@ public class SalaryImportServlet extends HttpServlet {
             session.setAttribute("message", String.format("导入完成：新增 %d 条，更新 %d 条，跳过 %d 条，空行 %d 行", imported, updated, skipped, emptyRows));
             resp.sendRedirect(req.getContextPath() + "/salary-list");
         } catch (Exception e) {
-            throw new ServletException(e);
+            e.printStackTrace();
+            session.setAttribute("message", "导入失败，请稍后重试");
+            resp.sendRedirect(req.getContextPath() + "/salary-list");
         }
     }
 
@@ -189,8 +191,8 @@ public class SalaryImportServlet extends HttpServlet {
         putIfPresent(aliases, headerMap, "emp_id", "emp_id", "员工ID", "员工编号", "员工id", "员工ID");
         putIfPresent(aliases, headerMap, "emp_no", "emp_no", "员工编号", "工号", "员工ID");
         putIfPresent(aliases, headerMap, "salary_month", "salary_month", "计薪月份", "月份", "薪资月份", "计薪月份");
-        putIfPresent(aliases, headerMap, "expected_days", "expected_days", "应出勤天数", "应出勤", "本月应出勤天数");
-        putIfPresent(aliases, headerMap, "actual_days", "actual_days", "实际出勤天数", "实际出勤", "实际出勤天数");
+        putIfPresent(aliases, headerMap, "expected_days", "expected_days", "应出勤天数", "应出勤", "本月应出勤天数", "应出勤天数");
+        putIfPresent(aliases, headerMap, "actual_days", "actual_days", "实际出勤天数", "实际出勤", "实出勤", "实出勤天数", "出勤天数", "实际出勤状况", "出勤状况");
         putIfPresent(aliases, headerMap, "basic_salary", "basic_salary", "基本工资");
         putIfPresent(aliases, headerMap, "position_allowance", "position_allowance", "岗位津贴");
         putIfPresent(aliases, headerMap, "lunch_allowance", "lunch_allowance", "午餐补贴");

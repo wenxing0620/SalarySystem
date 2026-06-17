@@ -47,12 +47,10 @@ public class EmpDeleteServlet extends HttpServlet {
                 // Log the operation
                 try {
                     logService.log(userId, "DELETE_EMP", clientIp);
-                    System.out.println("Logged: user " + userId + " deleted employee " + id);
-                } catch (SQLException logEx) {
-                    System.err.println("Failed to log operation: " + logEx.getMessage());
-                }
-            } catch (SQLException ignored) {
-                System.err.println("Failed to delete employee: " + ignored.getMessage());
+                } catch (SQLException ignored) {}
+            } catch (SQLException e) {
+                e.printStackTrace();
+                session.setAttribute("message", "删除员工失败，请稍后重试");
             }
         }
         response.sendRedirect(request.getContextPath() + "/emp-list");

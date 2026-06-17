@@ -53,7 +53,7 @@ public class DeptServlet extends HttpServlet {
             req.getRequestDispatcher("/dept.jsp").forward(req, resp);
         } catch (SQLException e) {
             e.printStackTrace();
-            req.setAttribute("error", "加载部门列表失败：" + e.getMessage());
+            req.setAttribute("error", "加载部门列表失败，请稍后重试");
             req.getRequestDispatcher("/dept.jsp").forward(req, resp);
         }
     }
@@ -128,7 +128,7 @@ public class DeptServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/dept");
         } catch (Exception e) {
             e.printStackTrace();
-            session.setAttribute("message", "操作失败：" + e.getMessage());
+            session.setAttribute("message", "操作失败，请稍后重试");
             resp.sendRedirect(req.getContextPath() + "/dept");
         }
     }

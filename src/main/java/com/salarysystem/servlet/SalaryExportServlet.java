@@ -116,7 +116,8 @@ public class SalaryExportServlet extends HttpServlet {
             try { logService.log(null, "EXPORT_SALARY", req.getRemoteAddr()); } catch (SQLException ignored) {}
 
         } catch (SQLException e) {
-            throw new ServletException(e);
+            e.printStackTrace();
+            throw new ServletException("导出失败，请稍后重试", e);
         }
     }
 }

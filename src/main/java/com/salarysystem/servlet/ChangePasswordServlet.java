@@ -70,7 +70,7 @@ public class ChangePasswordServlet extends HttpServlet {
             req.getRequestDispatcher("/change-password.jsp").forward(req, resp);
         } catch (Exception e) {
             e.printStackTrace();
-            req.setAttribute("error", "系统错误：" + e.getMessage());
+            req.setAttribute("error", "系统错误，请稍后重试");
             req.getRequestDispatcher("/change-password.jsp").forward(req, resp);
         }
     }

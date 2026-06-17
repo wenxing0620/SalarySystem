@@ -1,6 +1,6 @@
 -- 创建数据库
-CREATE DATABASE IF NOT EXISTS web2026 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE web2026;
+CREATE DATABASE IF NOT EXISTS SalarySystem CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE SalarySystem;
 
 -- 1. 角色表
 CREATE TABLE sys_role (
@@ -86,6 +86,13 @@ CREATE TABLE salary_record (
     actual_salary DECIMAL(10,2) NOT NULL COMMENT '实发工资',
     UNIQUE KEY `uk_emp_month` (`emp_id`, `salary_month`) COMMENT '每个员工每月只有一条薪资记录'
 ) ENGINE=InnoDB COMMENT='月度薪资主表';
+
+--8. 部门表
+CREATE TABLE IF NOT EXISTS sys_dept (
+    dept_id INT AUTO_INCREMENT PRIMARY KEY COMMENT '部门ID',
+    dept_name VARCHAR(50) NOT NULL UNIQUE COMMENT '部门名称',
+    remark VARCHAR(200) DEFAULT '' COMMENT '备注'
+    ) ENGINE=InnoDB COMMENT='部门表';
 
 -- 添加外键约束
 ALTER TABLE sys_user ADD CONSTRAINT fk_user_role FOREIGN KEY (role_id) REFERENCES sys_role(role_id);

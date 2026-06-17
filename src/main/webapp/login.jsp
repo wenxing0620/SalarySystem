@@ -88,15 +88,7 @@
         %>
 
         <% if (error != null) { %>
-            <div class="alert alert-error">
-                <%= error %>
-                <%
-                    String errorDetail = (String) request.getAttribute("errorDetail");
-                    if (errorDetail != null && !errorDetail.isEmpty()) {
-                %>
-                <div style="margin-top:4px;font-size:11px;opacity:0.8;word-break:break-all;"><%= errorDetail %></div>
-                <% } %>
-            </div>
+            <div class="alert alert-error"><%= error %></div>
         <% } %>
 
         <% if (success != null) { %>

@@ -98,7 +98,7 @@ public class SalaryRecordServiceImpl implements SalaryRecordService {
                 skipReasons.append("员工ID=").append(empId).append(": ").append(e.getMessage()).append("\n");
             } catch (Exception e) {
                 failed++;
-                System.err.println("计算员工" + empId + "个税失败: " + e.getMessage());
+                skipReasons.append("员工ID=").append(empId).append(": 计算异常\n");
             }
         }
 

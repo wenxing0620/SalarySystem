@@ -144,7 +144,7 @@
 <div class="modal-overlay<%= editModalOpen ? " show" : "" %>" id="editModal">
     <div class="modal modal-wide">
         <h3>编辑员工</h3>
-        <form method="post" action="<%= request.getContextPath() %>/emp-edit">
+        <form method="post" action="<%= request.getContextPath() %>/emp-edit" onsubmit="return validateEditForm()">
             <input type="hidden" name="empId" value="<%= editModalOpen && editEmp.getEmpId() != null ? editEmp.getEmpId() : "" %>">
             <div class="form-row">
                 <div class="form-group" style="flex:1;">
@@ -214,10 +214,25 @@ function validateAddForm() {
     var empNo = document.getElementById('addEmpNo').value.trim();
     var empName = document.getElementById('addEmpName').value.trim();
     var idCard = document.getElementById('addIdCard').value.trim();
+    var phone = document.getElementById('addPhone').value.trim();
     if (!empNo) { alert('员工编号不能为空'); return false; }
     if (!empName) { alert('姓名不能为空'); return false; }
     if (!idCard) { alert('身份证号不能为空'); return false; }
-    if (idCard.length !== 18) { alert('身份证号应为 18 位'); return false; }
+    if (idCard.length !== 18 || !/^\d{17}[\dXx]$/.test(idCard)) { alert('身份证号应为18位数字，最后一位可为数字或X'); return false; }
+    if (phone && !/^\d{11}$/.test(phone)) { alert('手机号应为11位数字'); return false; }
+    return true;
+}
+
+function validateEditForm() {
+    var empNo = document.getElementById('editEmpNo').value.trim();
+    var empName = document.getElementById('editEmpName').value.trim();
+    var idCard = document.getElementById('editIdCard').value.trim();
+    var phone = document.getElementById('editPhone').value.trim();
+    if (!empNo) { alert('员工编号不能为空'); return false; }
+    if (!empName) { alert('姓名不能为空'); return false; }
+    if (!idCard) { alert('身份证号不能为空'); return false; }
+    if (idCard.length !== 18 || !/^\d{17}[\dXx]$/.test(idCard)) { alert('身份证号应为18位数字，最后一位可为数字或X'); return false; }
+    if (phone && !/^\d{11}$/.test(phone)) { alert('手机号应为11位数字'); return false; }
     return true;
 }
 

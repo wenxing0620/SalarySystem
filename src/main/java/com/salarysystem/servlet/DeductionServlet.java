@@ -76,7 +76,9 @@ public class DeductionServlet extends HttpServlet {
 			logService.log(user.getUserId(), "QUERY_DEDUCTION", req.getRemoteAddr());
 			req.getRequestDispatcher("/deduction.jsp").forward(req, resp);
 		} catch (SQLException e) {
-			throw new ServletException(e);
+			e.printStackTrace();
+			req.setAttribute("error", "加载专项扣除数据失败，请稍后重试");
+			req.getRequestDispatcher("/deduction.jsp").forward(req, resp);
 		}
 	}
 
@@ -160,7 +162,9 @@ public class DeductionServlet extends HttpServlet {
 			session.setAttribute("message", deductionId == null ? "申报记录新增成功" : "申报记录更新成功");
 			resp.sendRedirect(req.getContextPath() + "/deduction");
 		} catch (SQLException e) {
-			throw new ServletException(e);
+			e.printStackTrace();
+			session.setAttribute("message", "操作失败，请稍后重试");
+			resp.sendRedirect(req.getContextPath() + "/deduction");
 		}
 	}
 

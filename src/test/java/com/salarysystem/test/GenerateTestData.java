@@ -48,8 +48,8 @@ public class GenerateTestData {
             int[] empIds = createEmployees();
             createFamilies(empIds);
             createDeductions(empIds);
-            createSalaries(empIds);
-            calculateAllTaxes();
+            //createSalaries(empIds);
+            //calculateAllTaxes();
             linkUsers();
             conn.commit();
             System.out.println("\n✓ 验收测试数据全部生成完成！");
@@ -197,150 +197,150 @@ public class GenerateTestData {
     }
 
     // ── 4. 创建薪资记录 ──
-    private void createSalaries(int[] empIds) throws SQLException {
-        System.out.println("\n── 创建 2026-06 薪资记录...");
-        // exD, acD, basic, pos, lunch, overtime, fullAttend, ss, pf, absence
-        Object[][] data = {
-            {0,  22,22, 18000,5000,600,0,   1000, 2100,1800,0},    // 张建国
-            {1,  22,22, 14000,3000,500,0,    800, 1600,1400,0},    // 李明辉
-            {2,  22,22, 10000,1500,500,0,    500, 1200,1000,0},    // 王芳
-            {3,  22,22,  7000, 800,400,800,  300,  900, 700,0},    // 陈小龙
-            {4,  22,22, 13000,2500,500,0,    800, 1500,1300,0},    // 赵雅婷
-            {5,  22,22,  7000,1200,400,0,    400,  850, 650,0},    // 钱小华
-            {6,  22,22, 12000,2500,500,0,    800, 1450,1200,0},    // 孙丽萍
-            {7,  22,20,  6000, 800,400,200,    0,  750, 550,100},  // 周文博（迟到2天）
-            {8,  22,22, 16000,4000,600,2000,1000, 2100,1800,0},    // 吴海涛（加班）
-            {9,  22,22,  6000,1000,400,500,  300,  780, 600,0},    // 郑晓燕（加班）
-            {10, 22,22,  8500,1500,400,0,    500, 1050, 850,0},    // 冯志远
-            {11, 22,22,  4000, 500,400,0,    200,  500, 350,0},    // 何小娟
-        };
+//    private void createSalaries(int[] empIds) throws SQLException {
+//        System.out.println("\n── 创建 2026-06 薪资记录...");
+//        // exD, acD, basic, pos, lunch, overtime, fullAttend, ss, pf, absence
+//        Object[][] data = {
+//            {0,  22,22, 18000,5000,600,0,   1000, 2100,1800,0},    // 张建国
+//            {1,  22,22, 14000,3000,500,0,    800, 1600,1400,0},    // 李明辉
+//            {2,  22,22, 10000,1500,500,0,    500, 1200,1000,0},    // 王芳
+//            {3,  22,22,  7000, 800,400,800,  300,  900, 700,0},    // 陈小龙
+//            {4,  22,22, 13000,2500,500,0,    800, 1500,1300,0},    // 赵雅婷
+//            {5,  22,22,  7000,1200,400,0,    400,  850, 650,0},    // 钱小华
+//            {6,  22,22, 12000,2500,500,0,    800, 1450,1200,0},    // 孙丽萍
+//            {7,  22,20,  6000, 800,400,200,    0,  750, 550,100},  // 周文博（迟到2天）
+//            {8,  22,22, 16000,4000,600,2000,1000, 2100,1800,0},    // 吴海涛（加班）
+//            {9,  22,22,  6000,1000,400,500,  300,  780, 600,0},    // 郑晓燕（加班）
+//            {10, 22,22,  8500,1500,400,0,    500, 1050, 850,0},    // 冯志远
+//            {11, 22,22,  4000, 500,400,0,    200,  500, 350,0},    // 何小娟
+//        };
+//
+//        String sql = "INSERT INTO salary_record(emp_id, salary_month, expected_days, actual_days, basic_salary, position_allowance, lunch_allowance, overtime_salary, full_attend_salary, social_security, provident_fund, tax, absence_deduction, actual_salary) VALUES(?,?,?,?,?,?,?,?,?,?,?,0,?,0)";
+//        for (Object[] d : data) {
+//            int empId = empIds[(int)d[0]];
+//            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+//                ps.setInt(1, empId);
+//                ps.setString(2, "2026-06");
+//                ps.setInt(3, (int)d[1]);
+//                ps.setInt(4, (int)d[2]);
+//                ps.setBigDecimal(5, bd(d[3]));
+//                ps.setBigDecimal(6, bd(d[4]));
+//                ps.setBigDecimal(7, bd(d[5]));
+//                ps.setBigDecimal(8, bd(d[6]));
+//                ps.setBigDecimal(9, bd(d[7]));
+//                ps.setBigDecimal(10, bd(d[8]));
+//                ps.setBigDecimal(11, bd(d[9]));
+//                ps.setBigDecimal(12, bd(d[10]));
+//                ps.executeUpdate();
+//                BigDecimal gross = bd(d[3]).add(bd(d[4])).add(bd(d[5])).add(bd(d[6])).add(bd(d[7]));
+//                System.out.printf("  员工[%d] 月薪总额=%.0f%n", empId, gross);
+//            }
+//        }
+//    }
 
-        String sql = "INSERT INTO salary_record(emp_id, salary_month, expected_days, actual_days, basic_salary, position_allowance, lunch_allowance, overtime_salary, full_attend_salary, social_security, provident_fund, tax, absence_deduction, actual_salary) VALUES(?,?,?,?,?,?,?,?,?,?,?,0,?,0)";
-        for (Object[] d : data) {
-            int empId = empIds[(int)d[0]];
-            try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                ps.setInt(1, empId);
-                ps.setString(2, "2026-06");
-                ps.setInt(3, (int)d[1]);
-                ps.setInt(4, (int)d[2]);
-                ps.setBigDecimal(5, bd(d[3]));
-                ps.setBigDecimal(6, bd(d[4]));
-                ps.setBigDecimal(7, bd(d[5]));
-                ps.setBigDecimal(8, bd(d[6]));
-                ps.setBigDecimal(9, bd(d[7]));
-                ps.setBigDecimal(10, bd(d[8]));
-                ps.setBigDecimal(11, bd(d[9]));
-                ps.setBigDecimal(12, bd(d[10]));
-                ps.executeUpdate();
-                BigDecimal gross = bd(d[3]).add(bd(d[4])).add(bd(d[5])).add(bd(d[6])).add(bd(d[7]));
-                System.out.printf("  员工[%d] 月薪总额=%.0f%n", empId, gross);
-            }
-        }
-    }
+//    // ── 5. 批量计算个税 ──
+//    private void calculateAllTaxes() throws SQLException {
+//        System.out.println("\n── 批量计算 2026-06 个税...");
+//
+//        // 获取当月所有薪资记录
+//        var records = new java.util.ArrayList<long[]>();
+//        try (PreparedStatement ps = conn.prepareStatement(
+//                "SELECT record_id, emp_id FROM salary_record WHERE salary_month = '2026-06'")) {
+//            ResultSet rs = ps.executeQuery();
+//            while (rs.next()) records.add(new long[]{rs.getLong(1), rs.getInt(2)});
+//        }
+//
+//        int success = 0, skipped = 0;
+//        for (long[] rec : records) {
+//            long recordId = rec[0];
+//            int empId = (int) rec[1];
+//            try {
+//                BigDecimal[] taxResult = calcTax(empId);
+//                try (PreparedStatement ps = conn.prepareStatement(
+//                        "UPDATE salary_record SET tax = ?, actual_salary = ? WHERE record_id = ?")) {
+//                    ps.setBigDecimal(1, taxResult[0]);
+//                    ps.setBigDecimal(2, taxResult[1]);
+//                    ps.setLong(3, recordId);
+//                    ps.executeUpdate();
+//                }
+//                success++;
+//                System.out.printf("  员工[%d] 个税=%.2f 实发=%.2f%n", empId, taxResult[0], taxResult[1]);
+//            } catch (SkippedException e) {
+//                skipped++;
+//                System.out.println("  员工[" + empId + "] 跳过: " + e.getMessage());
+//            }
+//        }
+//        System.out.printf("  计税完成: 成功 %d 人, 跳过 %d 人%n", success, skipped);
+//    }
+//
+//    // ── 个税计算逻辑（与 SalaryRecordServiceImpl.calculateTaxForEmployee 一致） ──
+//    private static final int[][] TAX_BRACKETS = {
+//        {0, 36000, 3, 0},
+//        {36000, 144000, 10, 2520},
+//        {144000, 300000, 20, 16920},
+//        {300000, 420000, 25, 31920},
+//        {420000, 660000, 30, 52920},
+//        {660000, 960000, 35, 85920},
+//        {960000, Integer.MAX_VALUE, 45, 181920}
+//    };
+//    private static final BigDecimal MONTHLY_THRESHOLD = new BigDecimal("5000");
+//
+//    private BigDecimal[] calcTax(int empId) throws SQLException {
+//        // 读取当月薪资
+//        salaryRow sr = null;
+//        try (PreparedStatement ps = conn.prepareStatement(
+//                "SELECT basic_salary, position_allowance, lunch_allowance, overtime_salary, full_attend_salary, social_security, provident_fund, absence_deduction FROM salary_record WHERE emp_id = ? AND salary_month = '2026-06'")) {
+//            ps.setInt(1, empId);
+//            ResultSet rs = ps.executeQuery();
+//            if (!rs.next()) throw new SkippedException("当月无薪资记录");
+//            sr = new salaryRow(rs);
+//        }
+//
+//        // 读取年度专项扣除
+//        BigDecimal annualDeduction = BigDecimal.ZERO;
+//        try (PreparedStatement ps = conn.prepareStatement(
+//                "SELECT child_edu, cont_edu, major_med, housing_loan, housing_rent, support_elderly, baby_care FROM tax_deduction WHERE emp_id = ? AND declare_year = 2026")) {
+//            ps.setInt(1, empId);
+//            ResultSet rs = ps.executeQuery();
+//            if (!rs.next()) throw new SkippedException("无2026年专项附加扣除申报");
+//            for (int i = 1; i <= 7; i++) annualDeduction = annualDeduction.add(rs.getBigDecimal(i));
+//        }
+//
+//        BigDecimal monthlySpecial = annualDeduction.divide(new BigDecimal("12"), 2, RoundingMode.HALF_UP);
+//        BigDecimal monthlyGross = sr.basic.add(sr.position).add(sr.lunch).add(sr.overtime).add(sr.fullAttend);
+//        BigDecimal taxableIncome = monthlyGross.subtract(sr.ss).subtract(sr.pf).subtract(MONTHLY_THRESHOLD).subtract(monthlySpecial);
+//
+//        BigDecimal tax;
+//        if (taxableIncome.compareTo(BigDecimal.ZERO) <= 0) {
+//            tax = BigDecimal.ZERO;
+//        } else {
+//            BigDecimal annualized = taxableIncome.multiply(new BigDecimal("12"));
+//            int cents = annualized.multiply(new BigDecimal("100")).intValue();
+//            int rate = 3, quick = 0;
+//            for (int[] b : TAX_BRACKETS) {
+//                if (cents <= b[1] * 100) { rate = b[2]; quick = b[3]; break; }
+//            }
+//            BigDecimal annualizedTax = annualized.multiply(new BigDecimal(rate)).divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP).subtract(new BigDecimal(quick));
+//            if (annualizedTax.compareTo(BigDecimal.ZERO) < 0) annualizedTax = BigDecimal.ZERO;
+//            tax = annualizedTax.divide(new BigDecimal("12"), 2, RoundingMode.HALF_UP);
+//        }
+//
+//        BigDecimal actualSalary = monthlyGross.subtract(sr.ss).subtract(sr.pf).subtract(tax).subtract(sr.absence);
+//        return new BigDecimal[]{tax, actualSalary};
+//    }
 
-    // ── 5. 批量计算个税 ──
-    private void calculateAllTaxes() throws SQLException {
-        System.out.println("\n── 批量计算 2026-06 个税...");
-
-        // 获取当月所有薪资记录
-        var records = new java.util.ArrayList<long[]>();
-        try (PreparedStatement ps = conn.prepareStatement(
-                "SELECT record_id, emp_id FROM salary_record WHERE salary_month = '2026-06'")) {
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) records.add(new long[]{rs.getLong(1), rs.getInt(2)});
-        }
-
-        int success = 0, skipped = 0;
-        for (long[] rec : records) {
-            long recordId = rec[0];
-            int empId = (int) rec[1];
-            try {
-                BigDecimal[] taxResult = calcTax(empId);
-                try (PreparedStatement ps = conn.prepareStatement(
-                        "UPDATE salary_record SET tax = ?, actual_salary = ? WHERE record_id = ?")) {
-                    ps.setBigDecimal(1, taxResult[0]);
-                    ps.setBigDecimal(2, taxResult[1]);
-                    ps.setLong(3, recordId);
-                    ps.executeUpdate();
-                }
-                success++;
-                System.out.printf("  员工[%d] 个税=%.2f 实发=%.2f%n", empId, taxResult[0], taxResult[1]);
-            } catch (SkippedException e) {
-                skipped++;
-                System.out.println("  员工[" + empId + "] 跳过: " + e.getMessage());
-            }
-        }
-        System.out.printf("  计税完成: 成功 %d 人, 跳过 %d 人%n", success, skipped);
-    }
-
-    // ── 个税计算逻辑（与 SalaryRecordServiceImpl.calculateTaxForEmployee 一致） ──
-    private static final int[][] TAX_BRACKETS = {
-        {0, 36000, 3, 0},
-        {36000, 144000, 10, 2520},
-        {144000, 300000, 20, 16920},
-        {300000, 420000, 25, 31920},
-        {420000, 660000, 30, 52920},
-        {660000, 960000, 35, 85920},
-        {960000, Integer.MAX_VALUE, 45, 181920}
-    };
-    private static final BigDecimal MONTHLY_THRESHOLD = new BigDecimal("5000");
-
-    private BigDecimal[] calcTax(int empId) throws SQLException {
-        // 读取当月薪资
-        salaryRow sr = null;
-        try (PreparedStatement ps = conn.prepareStatement(
-                "SELECT basic_salary, position_allowance, lunch_allowance, overtime_salary, full_attend_salary, social_security, provident_fund, absence_deduction FROM salary_record WHERE emp_id = ? AND salary_month = '2026-06'")) {
-            ps.setInt(1, empId);
-            ResultSet rs = ps.executeQuery();
-            if (!rs.next()) throw new SkippedException("当月无薪资记录");
-            sr = new salaryRow(rs);
-        }
-
-        // 读取年度专项扣除
-        BigDecimal annualDeduction = BigDecimal.ZERO;
-        try (PreparedStatement ps = conn.prepareStatement(
-                "SELECT child_edu, cont_edu, major_med, housing_loan, housing_rent, support_elderly, baby_care FROM tax_deduction WHERE emp_id = ? AND declare_year = 2026")) {
-            ps.setInt(1, empId);
-            ResultSet rs = ps.executeQuery();
-            if (!rs.next()) throw new SkippedException("无2026年专项附加扣除申报");
-            for (int i = 1; i <= 7; i++) annualDeduction = annualDeduction.add(rs.getBigDecimal(i));
-        }
-
-        BigDecimal monthlySpecial = annualDeduction.divide(new BigDecimal("12"), 2, RoundingMode.HALF_UP);
-        BigDecimal monthlyGross = sr.basic.add(sr.position).add(sr.lunch).add(sr.overtime).add(sr.fullAttend);
-        BigDecimal taxableIncome = monthlyGross.subtract(sr.ss).subtract(sr.pf).subtract(MONTHLY_THRESHOLD).subtract(monthlySpecial);
-
-        BigDecimal tax;
-        if (taxableIncome.compareTo(BigDecimal.ZERO) <= 0) {
-            tax = BigDecimal.ZERO;
-        } else {
-            BigDecimal annualized = taxableIncome.multiply(new BigDecimal("12"));
-            int cents = annualized.multiply(new BigDecimal("100")).intValue();
-            int rate = 3, quick = 0;
-            for (int[] b : TAX_BRACKETS) {
-                if (cents <= b[1] * 100) { rate = b[2]; quick = b[3]; break; }
-            }
-            BigDecimal annualizedTax = annualized.multiply(new BigDecimal(rate)).divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP).subtract(new BigDecimal(quick));
-            if (annualizedTax.compareTo(BigDecimal.ZERO) < 0) annualizedTax = BigDecimal.ZERO;
-            tax = annualizedTax.divide(new BigDecimal("12"), 2, RoundingMode.HALF_UP);
-        }
-
-        BigDecimal actualSalary = monthlyGross.subtract(sr.ss).subtract(sr.pf).subtract(tax).subtract(sr.absence);
-        return new BigDecimal[]{tax, actualSalary};
-    }
-
-    private static class salaryRow {
-        final BigDecimal basic, position, lunch, overtime, fullAttend, ss, pf, absence;
-        salaryRow(ResultSet rs) throws SQLException {
-            basic = rs.getBigDecimal(1); position = rs.getBigDecimal(2); lunch = rs.getBigDecimal(3);
-            overtime = rs.getBigDecimal(4); fullAttend = rs.getBigDecimal(5);
-            ss = rs.getBigDecimal(6); pf = rs.getBigDecimal(7); absence = rs.getBigDecimal(8);
-        }
-    }
-
-    private static class SkippedException extends RuntimeException {
-        SkippedException(String msg) { super(msg); }
-    }
+//    private static class salaryRow {
+//        final BigDecimal basic, position, lunch, overtime, fullAttend, ss, pf, absence;
+//        salaryRow(ResultSet rs) throws SQLException {
+//            basic = rs.getBigDecimal(1); position = rs.getBigDecimal(2); lunch = rs.getBigDecimal(3);
+//            overtime = rs.getBigDecimal(4); fullAttend = rs.getBigDecimal(5);
+//            ss = rs.getBigDecimal(6); pf = rs.getBigDecimal(7); absence = rs.getBigDecimal(8);
+//        }
+//    }
+//
+//    private static class SkippedException extends RuntimeException {
+//        SkippedException(String msg) { super(msg); }
+//    }
 
     // ── 6. 关联用户到员工 ──
     private void linkUsers() throws SQLException {
