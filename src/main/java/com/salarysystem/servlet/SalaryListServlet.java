@@ -1,5 +1,6 @@
 package com.salarysystem.servlet;
 
+import com.salarysystem.model.PageResult;
 import com.salarysystem.model.empInfo;
 import com.salarysystem.model.salaryRecord;
 import com.salarysystem.model.sysUser;
@@ -222,13 +223,20 @@ public class SalaryListServlet extends HttpServlet {
             rows.add(new SalaryRow(r, empMap.get(r.getEmpId())));
         }
 
+        // 分页：每页10条
+        int pageNo = 1;
+        try { pageNo = Math.max(1, Integer.parseInt(req.getParameter("pageNo"))); } catch (Exception ignored) {}
+        int pageSize = 10;
+        PageResult<SalaryRow> pageResult = paginate(rows, pageNo, pageSize);
+
         // 回传筛选参数
         req.setAttribute("keyword", keyword);
         req.setAttribute("dept", dept);
         req.setAttribute("startMonth", startMonth);
         req.setAttribute("endMonth", endMonth);
 
-        req.setAttribute("salaryRows", rows);
+        req.setAttribute("pageResult", pageResult);
+        req.setAttribute("salaryRows", pageResult.getData());
         req.setAttribute("employees", employees);
     }
 
@@ -249,6 +257,14 @@ public class SalaryListServlet extends HttpServlet {
 
     private String safe(String value) {
         return value == null ? "" : value.trim();
+    }
+
+    private <T> PageResult<T> paginate(List<T> fullList, int pageNo, int pageSize) {
+        int total = fullList.size();
+        int from = (pageNo - 1) * pageSize;
+        if (from >= total) from = 0;
+        int to = Math.min(from + pageSize, total);
+        return new PageResult<>(fullList.subList(from, to), pageNo, pageSize, total);
     }
 
     /**

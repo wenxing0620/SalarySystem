@@ -85,7 +85,7 @@
                 <table>
                     <thead>
                     <tr>
-                        <th>ID</th>
+                        <th style="width:80px;">序号</th>
                         <th>员工编号</th>
                         <th>姓名</th>
                         <th>部门</th>
@@ -104,11 +104,11 @@
                     <% if (rows.isEmpty()) { %>
                     <tr><td colspan="13" class="text-center" style="color:#999;padding:20px;">暂无申报记录</td></tr>
                     <% } else {
-                        for (DeductionViewRow row : rows) {
+                        int index = 1; for (DeductionViewRow row : rows) {
                             taxDeduction r = row.getRecord();
                     %>
                     <tr>
-                        <td><%= r.getDeductionId() %></td>
+                        <td><%= index++ %></td>
                         <td><%= row.getEmpNo() %></td>
                         <td><span class="masked"><%= row.getEmpNameMasked() %></span></td>
                         <td><%= row.getDeptName() %></td>

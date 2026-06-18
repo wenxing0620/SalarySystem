@@ -18,7 +18,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @WebServlet("/audit-log")
 public class AuditLogServlet extends HttpServlet {
@@ -43,7 +45,7 @@ public class AuditLogServlet extends HttpServlet {
             String endDateStr = request.getParameter("endDate");
             String userIdStr = request.getParameter("userId");
             int pageNo = parseIntOrDefault(request.getParameter("pageNo"), 1);
-            int pageSize = 15;
+            int pageSize = 10;
 
             Integer filterUserId = null;
             if (userIdStr != null && !userIdStr.isEmpty()) {
@@ -63,6 +65,22 @@ public class AuditLogServlet extends HttpServlet {
             PageResult<sysLog> pageResult = logService.findByFilters(
                     filterUserId, (actionType != null && !actionType.isEmpty()) ? actionType : null,
                     startTime, endTime, pageNo, pageSize);
+
+            // 构建 userId → username 映射，供页面显示操作人姓名
+            Map<Integer, String> userNameMap = new HashMap<>();
+            if (pageResult != null) {
+                for (sysLog log : pageResult.getData()) {
+                    if (log.getUserId() != null && !userNameMap.containsKey(log.getUserId())) {
+                        try {
+                            sysUser u = userService.findById(log.getUserId());
+                            userNameMap.put(log.getUserId(), u != null ? u.getUsername() : ("用户#" + log.getUserId()));
+                        } catch (SQLException e) {
+                            userNameMap.put(log.getUserId(), "用户#" + log.getUserId());
+                        }
+                    }
+                }
+            }
+            request.setAttribute("userNameMap", userNameMap);
 
             // 获取所有操作类型（供筛选下拉框）
             List<String> allActionTypes = logService.findAllActionTypes();

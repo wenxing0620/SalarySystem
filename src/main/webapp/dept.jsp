@@ -1,5 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="com.salarysystem.model.sysUser, com.salarysystem.model.sysDept" %>
+<%@ page import="com.salarysystem.model.sysUser, com.salarysystem.model.sysDept, com.salarysystem.model.PageResult" %>
 <%@ page import="java.util.List, java.util.Map" %>
 <%
     sysUser user = (sysUser) session.getAttribute("currentUser");
@@ -11,6 +11,9 @@
 
     @SuppressWarnings("unchecked")
     Map<Integer, Integer> empCountMap = (Map<Integer, Integer>) request.getAttribute("empCountMap");
+
+    @SuppressWarnings("unchecked")
+    PageResult<sysDept> pageResult = (PageResult<sysDept>) request.getAttribute("pageResult");
 
     sysDept editDept = (sysDept) request.getAttribute("editDept");
     boolean editModalOpen = editDept != null;
@@ -73,6 +76,21 @@
                 <% } } %>
                 </tbody>
             </table>
+
+            <% if (pageResult != null && pageResult.getTotalPages() > 1) { %>
+            <div class="pagination">
+                <% if (pageResult.hasPrevPage()) { %>
+                <a href="?pageNo=1">首页</a>
+                <a href="?pageNo=<%= pageResult.getPageNo() - 1 %>">上一页</a>
+                <% } else { %><span class="disabled">首页</span><span class="disabled">上一页</span><% } %>
+                <span class="current"><%= pageResult.getPageNo() %> / <%= pageResult.getTotalPages() %></span>
+                <% if (pageResult.hasNextPage()) { %>
+                <a href="?pageNo=<%= pageResult.getPageNo() + 1 %>">下一页</a>
+                <a href="?pageNo=<%= pageResult.getTotalPages() %>">末页</a>
+                <% } else { %><span class="disabled">下一页</span><span class="disabled">末页</span><% } %>
+                <span>共 <%= pageResult.getTotalPages() %> 页，<%= pageResult.getTotalCount() %> 条</span>
+            </div>
+            <% } %>
         </div>
     </div>
 </div>

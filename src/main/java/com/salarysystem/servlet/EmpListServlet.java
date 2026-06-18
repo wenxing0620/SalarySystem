@@ -1,5 +1,6 @@
 package com.salarysystem.servlet;
 
+import com.salarysystem.model.PageResult;
 import com.salarysystem.model.empInfo;
 import com.salarysystem.model.sysDept;
 import com.salarysystem.service.impl.EmpInfoServiceImpl;
@@ -44,7 +45,15 @@ public class EmpListServlet extends HttpServlet {
                 }
                 list = filtered;
             }
-            request.setAttribute("empList", list);
+
+            // 分页：每页10条
+            int pageNo = 1;
+            try { pageNo = Math.max(1, Integer.parseInt(request.getParameter("pageNo"))); } catch (Exception ignored) {}
+            int pageSize = 10;
+            PageResult<empInfo> pageResult = paginate(list, pageNo, pageSize);
+
+            request.setAttribute("pageResult", pageResult);
+            request.setAttribute("empList", pageResult.getData());
             request.setAttribute("keyword", keyword);
 
             // 加载部门列表（供弹窗下拉框使用）
@@ -91,5 +100,18 @@ public class EmpListServlet extends HttpServlet {
 
     private boolean contains(String text, String keyword) {
         return text != null && text.toLowerCase(Locale.ROOT).contains(keyword);
+    }
+
+    private int parseInt(String value) {
+        if (value == null || value.trim().isEmpty()) return 1;
+        try { return Integer.parseInt(value.trim()); } catch (NumberFormatException e) { return 1; }
+    }
+
+    private <T> PageResult<T> paginate(List<T> fullList, int pageNo, int pageSize) {
+        int total = fullList.size();
+        int from = (pageNo - 1) * pageSize;
+        if (from >= total) from = 0;
+        int to = Math.min(from + pageSize, total);
+        return new PageResult<>(fullList.subList(from, to), pageNo, pageSize, total);
     }
 }

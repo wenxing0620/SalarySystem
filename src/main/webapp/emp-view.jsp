@@ -1,5 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="com.salarysystem.model.empInfo, com.salarysystem.model.sysUser, com.salarysystem.util.DesensitizeUtil" %>
+<%@ page import="com.salarysystem.model.empInfo, com.salarysystem.model.sysUser" %>
 <%
     sysUser user = (sysUser) session.getAttribute("currentUser");
     if (user == null) { response.sendRedirect("login.jsp"); return; }
@@ -38,12 +38,12 @@
         <div class="table-container">
             <table class="info-table">
                 <tr><th>员工编号</th><td><%= emp.getEmpNo() %></td></tr>
-                <tr><th>姓名</th><td><span class="masked"><%= DesensitizeUtil.maskName(emp.getEmpName()) %></span></td></tr>
+                <tr><th>姓名</th><td><%= emp.getEmpName() != null ? emp.getEmpName() : "-" %></td></tr>
                 <tr><th>部门</th><td><%= emp.getDeptName() != null ? emp.getDeptName() : "-" %></td></tr>
                 <tr><th>岗位</th><td><%= emp.getPosition() != null ? emp.getPosition() : "-" %></td></tr>
-                <tr><th>身份证</th><td><span class="masked"><%= DesensitizeUtil.maskIdCard(emp.getIdCard()) %></span></td></tr>
-                <tr><th>手机号</th><td><span class="masked"><%= DesensitizeUtil.maskPhone(emp.getPhone()) %></span></td></tr>
-                <tr><th>住址</th><td><span class="masked"><%= DesensitizeUtil.maskAddress(emp.getAddress()) %></span></td></tr>
+                <tr><th>身份证</th><td><%= emp.getIdCard() != null ? emp.getIdCard() : "-" %></td></tr>
+                <tr><th>手机号</th><td><%= emp.getPhone() != null ? emp.getPhone() : "-" %></td></tr>
+                <tr><th>住址</th><td><%= emp.getAddress() != null ? emp.getAddress() : "-" %></td></tr>
             </table>
         </div>
     </div>

@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="com.salarysystem.model.sysUser, com.salarysystem.model.sysLog, com.salarysystem.model.PageResult" %>
-<%@ page import="java.util.List" %>
+<%@ page import="java.util.List, java.util.Map, java.util.HashMap" %>
 <%
     sysUser user = (sysUser) session.getAttribute("currentUser");
     if (user == null) { response.sendRedirect("login.jsp"); return; }
@@ -16,6 +16,51 @@
     String startDate = request.getAttribute("startDate") != null ? request.getAttribute("startDate").toString() : "";
     String endDate = request.getAttribute("endDate") != null ? request.getAttribute("endDate").toString() : "";
     String filterUserId = request.getAttribute("filterUserId") != null ? request.getAttribute("filterUserId").toString() : "";
+
+    @SuppressWarnings("unchecked")
+    Map<Integer, String> userNameMap = (Map<Integer, String>) request.getAttribute("userNameMap");
+    if (userNameMap == null) userNameMap = new HashMap<>();
+
+    // 操作类型中英文映射
+    Map<String, String> actionTypeMap = new HashMap<>();
+    actionTypeMap.put("LOGIN_SUCCESS", "登录成功");
+    actionTypeMap.put("LOGIN_FAIL", "登录失败");
+    actionTypeMap.put("LOGIN_FAIL_UNKNOWN_USER", "登录失败(未知用户)");
+    actionTypeMap.put("LOGOUT", "登出");
+    actionTypeMap.put("ADD_EMP", "新增员工");
+    actionTypeMap.put("UPDATE_EMP", "修改员工");
+    actionTypeMap.put("DELETE_EMP", "删除员工");
+    actionTypeMap.put("VIEW_EMP", "查看员工");
+    actionTypeMap.put("ADD_DEPT", "新增部门");
+    actionTypeMap.put("UPDATE_DEPT", "修改部门");
+    actionTypeMap.put("DELETE_DEPT", "删除部门");
+    actionTypeMap.put("ADD_FAMILY", "新增家属");
+    actionTypeMap.put("UPDATE_FAMILY", "修改家属");
+    actionTypeMap.put("DELETE_FAMILY", "删除家属");
+    actionTypeMap.put("QUERY_FAMILY", "查询家属");
+    actionTypeMap.put("ADD_DEDUCTION", "新增专项扣除");
+    actionTypeMap.put("UPDATE_DEDUCTION", "修改专项扣除");
+    actionTypeMap.put("DELETE_DEDUCTION", "删除专项扣除");
+    actionTypeMap.put("QUERY_DEDUCTION", "查询专项扣除");
+    actionTypeMap.put("ADD_SALARY", "新增薪资");
+    actionTypeMap.put("UPDATE_SALARY", "修改薪资");
+    actionTypeMap.put("DELETE_SALARY", "删除薪资");
+    actionTypeMap.put("QUERY_SALARY", "查询薪资");
+    actionTypeMap.put("CALCULATE_TAX", "计税");
+    actionTypeMap.put("IMPORT_SALARY", "导入薪资");
+    actionTypeMap.put("EXPORT_SALARY", "导出薪资");
+    actionTypeMap.put("CREATE_USER", "创建用户");
+    actionTypeMap.put("UPDATE_USER", "修改用户");
+    actionTypeMap.put("DELETE_USER", "删除用户");
+    actionTypeMap.put("RESET_PASSWORD", "重置密码");
+    actionTypeMap.put("CHANGE_PASSWORD", "修改密码");
+    actionTypeMap.put("UNLOCK_USER", "解锁用户");
+    actionTypeMap.put("ADD_ROLE", "新增角色");
+    actionTypeMap.put("UPDATE_ROLE", "修改角色");
+    actionTypeMap.put("DELETE_ROLE", "删除角色");
+    actionTypeMap.put("VIEW_AUDIT_LOG", "查看审计日志");
+    actionTypeMap.put("VIEW_DASHBOARD", "查看首页");
+    actionTypeMap.put("VIEW_USER_MANAGEMENT", "查看用户管理");
 
     // Build query string for pagination links
     String querySuffix = "";
@@ -58,7 +103,7 @@
                 <select name="actionType" style="width:auto;">
                     <option value="">全部</option>
                     <% for (String t : allActionTypes) { %>
-                    <option value="<%= t %>" <%= t.equals(actionType) ? "selected" : "" %>><%= t %></option>
+                    <option value="<%= t %>" <%= t.equals(actionType) ? "selected" : "" %>><%= actionTypeMap.getOrDefault(t, t) %></option>
                     <% } %>
                 </select>
             </div>
@@ -78,8 +123,8 @@
             <table>
                 <thead>
                 <tr>
-                    <th>日志ID</th>
-                    <th>用户ID</th>
+                    <th style="width:80px;">序号</th>
+                    <th>操作人</th>
                     <th>操作类型</th>
                     <th>IP地址</th>
                     <th>操作时间</th>
@@ -87,11 +132,17 @@
                 </tr>
                 </thead>
                 <tbody>
-                <% for (sysLog log : pageResult.getData()) { %>
+                <% int index = 1; for (sysLog log : pageResult.getData()) { %>
                 <tr>
-                    <td><%= log.getLogId() %></td>
-                    <td><%= log.getUserId() != null ? log.getUserId() : "-" %></td>
-                    <td><%= log.getActionType() %></td>
+                    <td><%= index++ %></td>
+                    <td>
+                        <% if (log.getUserId() != null) { %>
+                            <%= userNameMap.getOrDefault(log.getUserId(), "用户#" + log.getUserId()) %>
+                        <% } else { %>
+                            <span class="text-muted">系统</span>
+                        <% } %>
+                    </td>
+                    <td><%= actionTypeMap.getOrDefault(log.getActionType(), log.getActionType()) %></td>
                     <td><%= log.getIpAddress() %></td>
                     <td><%= log.getCreateTime() != null ? log.getCreateTime().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : "-" %></td>
                     <td>

@@ -1,5 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="com.salarysystem.model.sysUser, com.salarysystem.model.empInfo, com.salarysystem.model.sysDept" %>
+<%@ page import="com.salarysystem.model.sysUser, com.salarysystem.model.empInfo, com.salarysystem.model.sysDept, com.salarysystem.model.PageResult" %>
 <%@ page import="com.salarysystem.util.DesensitizeUtil, java.util.List" %>
 <%
     sysUser user = (sysUser) session.getAttribute("currentUser");
@@ -10,6 +10,9 @@
     if (empList == null) empList = new java.util.ArrayList<>();
 
     @SuppressWarnings("unchecked")
+    PageResult<empInfo> pageResult = (PageResult<empInfo>) request.getAttribute("pageResult");
+
+    @SuppressWarnings("unchecked")
     List<sysDept> deptList = (List<sysDept>) request.getAttribute("deptList");
     if (deptList == null) deptList = new java.util.ArrayList<>();
 
@@ -17,6 +20,7 @@
     boolean editModalOpen = editEmp != null;
 
     String keyword = request.getAttribute("keyword") != null ? request.getAttribute("keyword").toString() : "";
+    String querySuffix = !keyword.isEmpty() ? "&keyword=" + keyword : "";
 %>
 <!DOCTYPE html>
 <html>
@@ -83,6 +87,21 @@
                 <% } %>
                 </tbody>
             </table>
+
+            <% if (pageResult != null && pageResult.getTotalPages() > 1) { %>
+            <div class="pagination">
+                <% if (pageResult.hasPrevPage()) { %>
+                <a href="?pageNo=1<%= querySuffix %>">首页</a>
+                <a href="?pageNo=<%= pageResult.getPageNo() - 1 %><%= querySuffix %>">上一页</a>
+                <% } else { %><span class="disabled">首页</span><span class="disabled">上一页</span><% } %>
+                <span class="current"><%= pageResult.getPageNo() %> / <%= pageResult.getTotalPages() %></span>
+                <% if (pageResult.hasNextPage()) { %>
+                <a href="?pageNo=<%= pageResult.getPageNo() + 1 %><%= querySuffix %>">下一页</a>
+                <a href="?pageNo=<%= pageResult.getTotalPages() %><%= querySuffix %>">末页</a>
+                <% } else { %><span class="disabled">下一页</span><span class="disabled">末页</span><% } %>
+                <span>共 <%= pageResult.getTotalPages() %> 页，<%= pageResult.getTotalCount() %> 条</span>
+            </div>
+            <% } %>
         </div>
     </div>
 </div>

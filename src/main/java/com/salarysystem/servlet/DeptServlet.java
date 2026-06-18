@@ -1,5 +1,6 @@
 package com.salarysystem.servlet;
 
+import com.salarysystem.model.PageResult;
 import com.salarysystem.model.sysDept;
 import com.salarysystem.model.sysUser;
 import com.salarysystem.service.impl.SysDeptServiceImpl;
@@ -30,15 +31,22 @@ public class DeptServlet extends HttpServlet {
         }
 
         try {
-            List<sysDept> deptList = deptService.findAll();
+            List<sysDept> allDeptList = deptService.findAll();
 
             // 统计每个部门的员工数
             java.util.Map<Integer, Integer> empCountMap = new java.util.LinkedHashMap<>();
             com.salarysystem.dao.impl.SysDeptDaoImpl dao = new com.salarysystem.dao.impl.SysDeptDaoImpl();
-            for (sysDept d : deptList) {
+            for (sysDept d : allDeptList) {
                 empCountMap.put(d.getDeptId(), dao.countEmpByDeptName(d.getDeptName()));
             }
-            req.setAttribute("deptList", deptList);
+
+            // 分页：每页10条
+            int pageNo = Math.max(1, parseInt(req.getParameter("pageNo")));
+            int pageSize = 10;
+            PageResult<sysDept> pageResult = paginate(allDeptList, pageNo, pageSize);
+
+            req.setAttribute("pageResult", pageResult);
+            req.setAttribute("deptList", pageResult.getData());
             req.setAttribute("empCountMap", empCountMap);
 
             // 编辑模式：加载指定部门到表单
@@ -131,5 +139,18 @@ public class DeptServlet extends HttpServlet {
             session.setAttribute("message", "操作失败，请稍后重试");
             resp.sendRedirect(req.getContextPath() + "/dept");
         }
+    }
+
+    private int parseInt(String value) {
+        if (value == null || value.trim().isEmpty()) return 1;
+        try { return Integer.parseInt(value.trim()); } catch (NumberFormatException e) { return 1; }
+    }
+
+    private <T> PageResult<T> paginate(List<T> fullList, int pageNo, int pageSize) {
+        int total = fullList.size();
+        int from = (pageNo - 1) * pageSize;
+        if (from >= total) from = 0;
+        int to = Math.min(from + pageSize, total);
+        return new PageResult<>(fullList.subList(from, to), pageNo, pageSize, total);
     }
 }

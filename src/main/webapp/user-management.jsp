@@ -66,7 +66,7 @@
             <table>
                 <thead>
                 <tr>
-                    <th>ID</th>
+                    <th style="width:80px;">序号</th>
                     <th>用户名</th>
                     <th>角色</th>
                     <th>关联员工ID</th>
@@ -77,7 +77,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <% for (sysUser u : users.getData()) {
+                <% int index = 1; for (sysUser u : users.getData()) {
                     String roleName = "";
                     for (sysRole r : allRoles) {
                         if (r.getRoleId().equals(u.getRoleId())) { roleName = r.getRoleName(); break; }
@@ -85,7 +85,7 @@
                     boolean locked = u.getLockTime() != null && java.time.LocalDateTime.now().isBefore(u.getLockTime());
                 %>
                 <tr>
-                    <td><%= u.getUserId() %></td>
+                    <td><%= index++ %></td>
                     <td><strong><%= u.getUsername() %></strong></td>
                     <td><%= roleName %></td>
                     <td><%= u.getEmpId() != null ? u.getEmpId() : "-" %></td>

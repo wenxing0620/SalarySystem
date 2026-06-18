@@ -151,8 +151,8 @@ public class SalaryRecordServiceImpl implements SalaryRecordService {
             .add(nonNull(currentRecord.getOvertimeSalary()))
             .add(nonNull(currentRecord.getFullAttendSalary()));
 
-        // 4. 计算月均专项附加扣除（年总额 / 12）
-        BigDecimal annualSpecialDeduction = BigDecimal.ZERO
+        // 4. 计算当月专项附加扣除（直接使用年度申报金额）
+        BigDecimal monthlySpecialDeduction = BigDecimal.ZERO
             .add(nonNull(deduction.getChildEdu()))
             .add(nonNull(deduction.getContEdu()))
             .add(nonNull(deduction.getMajorMed()))
@@ -160,10 +160,9 @@ public class SalaryRecordServiceImpl implements SalaryRecordService {
             .add(nonNull(deduction.getHousingRent()))
             .add(nonNull(deduction.getSupportElderly()))
             .add(nonNull(deduction.getBabyCare()));
-        BigDecimal monthlySpecialDeduction = annualSpecialDeduction.divide(new BigDecimal("12"), 2, RoundingMode.HALF_UP);
 
         // 5. 计算应纳税所得额
-        // = 月薪 - 社保 - 公积金 - 5000(起征点) - 月均专项附加扣除
+        // = 月薪 - 社保 - 公积金 - 5000(起征点) - 当月专项附加扣除
         // 注意：迟到扣款不计入计税基数，只在最后实发工资时减去
         BigDecimal taxableIncome = monthlyGross
             .subtract(nonNull(currentRecord.getSocialSecurity()))

@@ -1,5 +1,6 @@
 package com.salarysystem.servlet;
 
+import com.salarysystem.model.PageResult;
 import com.salarysystem.model.empFamily;
 import com.salarysystem.model.empInfo;
 import com.salarysystem.model.sysUser;
@@ -183,7 +184,14 @@ public class FamilyServlet extends HttpServlet {
             rows.add(new FamilyViewRow(f, empMap.get(f.getEmpId())));
         }
 
-        req.setAttribute("familyRows", rows);
+        // 分页：每页10条
+        Integer pageNoObj = parseInt(req.getParameter("pageNo"));
+        int pageNo = pageNoObj != null ? Math.max(1, pageNoObj) : 1;
+        int pageSize = 10;
+        PageResult<FamilyViewRow> pageResult = paginate(rows, pageNo, pageSize);
+
+        req.setAttribute("pageResult", pageResult);
+        req.setAttribute("familyRows", pageResult.getData());
         req.setAttribute("allEmployees", employees);
         req.setAttribute("keyword", keyword);
         req.setAttribute("filterEmpId", filterEmpId != null ? filterEmpId : "");
@@ -200,6 +208,14 @@ public class FamilyServlet extends HttpServlet {
 
     private boolean contains(String text, String keyword) {
         return text != null && text.toLowerCase().contains(keyword);
+    }
+
+    private <T> PageResult<T> paginate(List<T> fullList, int pageNo, int pageSize) {
+        int total = fullList.size();
+        int from = (pageNo - 1) * pageSize;
+        if (from >= total) from = 0;
+        int to = Math.min(from + pageSize, total);
+        return new PageResult<>(fullList.subList(from, to), pageNo, pageSize, total);
     }
 
     /**

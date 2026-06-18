@@ -1,5 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="com.salarysystem.model.sysUser, com.salarysystem.model.empFamily, com.salarysystem.model.empInfo" %>
+<%@ page import="com.salarysystem.model.sysUser, com.salarysystem.model.empFamily, com.salarysystem.model.empInfo, com.salarysystem.model.PageResult" %>
 <%@ page import="com.salarysystem.servlet.FamilyServlet.FamilyViewRow" %>
 <%@ page import="com.salarysystem.util.DesensitizeUtil, java.util.List" %>
 <%
@@ -19,6 +19,11 @@
 
     String keyword = request.getAttribute("keyword") != null ? request.getAttribute("keyword").toString() : "";
     String filterEmpId = request.getAttribute("filterEmpId") != null ? request.getAttribute("filterEmpId").toString() : "";
+
+    @SuppressWarnings("unchecked")
+    PageResult<?> pageResult = (PageResult<?>) request.getAttribute("pageResult");
+
+    String querySuffix = (!keyword.isEmpty() ? "&keyword=" + keyword : "") + (!filterEmpId.isEmpty() ? "&filterEmpId=" + filterEmpId : "");
 
     String[] relations = {"父亲", "母亲", "儿子", "女儿", "配偶", "祖父", "祖母", "外祖父", "外祖母", "其他"};
 %>
@@ -68,7 +73,7 @@
             <table>
                 <thead>
                 <tr>
-                    <th>ID</th>
+                    <th style="width:80px;">序号</th>
                     <th>员工编号</th>
                     <th>员工姓名</th>
                     <th>部门</th>
@@ -82,11 +87,11 @@
                 <% if (rows.isEmpty()) { %>
                 <tr><td colspan="8" class="text-center" style="color:#999;padding:20px;">暂无家属记录</td></tr>
                 <% } else {
-                    for (FamilyViewRow row : rows) {
+                    int index = 1; for (FamilyViewRow row : rows) {
                         empFamily f = row.getFamily();
                 %>
                 <tr>
-                    <td><%= f.getFamilyId() %></td>
+                    <td><%= index++ %></td>
                     <td><%= row.getEmpNo() %></td>
                     <td><%= DesensitizeUtil.maskName(row.getEmpName()) %></td>
                     <td><%= row.getDeptName() %></td>
@@ -101,6 +106,21 @@
                 <% }} %>
                 </tbody>
             </table>
+
+            <% if (pageResult != null && pageResult.getTotalPages() > 1) { %>
+            <div class="pagination">
+                <% if (pageResult.hasPrevPage()) { %>
+                <a href="?pageNo=1<%= querySuffix %>">首页</a>
+                <a href="?pageNo=<%= pageResult.getPageNo() - 1 %><%= querySuffix %>">上一页</a>
+                <% } else { %><span class="disabled">首页</span><span class="disabled">上一页</span><% } %>
+                <span class="current"><%= pageResult.getPageNo() %> / <%= pageResult.getTotalPages() %></span>
+                <% if (pageResult.hasNextPage()) { %>
+                <a href="?pageNo=<%= pageResult.getPageNo() + 1 %><%= querySuffix %>">下一页</a>
+                <a href="?pageNo=<%= pageResult.getTotalPages() %><%= querySuffix %>">末页</a>
+                <% } else { %><span class="disabled">下一页</span><span class="disabled">末页</span><% } %>
+                <span>共 <%= pageResult.getTotalPages() %> 页，<%= pageResult.getTotalCount() %> 条</span>
+            </div>
+            <% } %>
         </div>
     </div>
 </div>
